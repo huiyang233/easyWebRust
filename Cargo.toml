@@ -1,0 +1,53 @@
+[package]
+name = "easyWebRust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+salvo = { version= "0.74.2",features=["cors","quinn"]  }
+tokio = { version = "1", features = ["macros"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.132"
+serde_yaml = "0.9.33"
+# 全局变量
+lazy_static = "1.4.0"
+# 时间类
+chrono = "0.4.38"
+
+rbs = { version = "4.5" }
+rbatis = { version = "4.5"}
+rbdc-mysql = {version="4.5", default-features = false, features = ["tls-native-tls"]}
+
+# 加密解密
+rust-crypto = "0.2.36"
+
+# 验证码的依赖
+base64 = "0.21.5"
+image = "0.24.9"
+rand = "0.8.5"
+imageproc = "0.23.0"
+rusttype = "0.9.2"
+
+# id生成
+idgen ="0.1.2"
+
+futures = "0.3.30"
+
+redis = { version = "0.27.5", features = ["tokio-comp","json"] }
+deadpool-redis = "0.18.0"
+
+
+
+[profile.dev]
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false
