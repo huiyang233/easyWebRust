@@ -2,3 +2,8 @@ server:
   port: 6500
 db_url: mysql://root:asd285808@localhost:3306/easy
 redis_url: redis://default:redispw@127.0.0.1/
+sms_config:
+  app_key: 123
+  app_secret: 123
+  sign_name: 123
+  region_id: 123

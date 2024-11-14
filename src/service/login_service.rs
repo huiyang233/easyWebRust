@@ -3,7 +3,7 @@ use std::ops::Deref;
 use crypto::digest::Digest;
 use crypto::md5::Md5;
 use lazy_static::lazy_static;
-use rand::distributions::Alphanumeric;
+use rand::distributions::Uniform;
 use rand::Rng;
 use rbatis::rbdc::Uuid;
 use salvo::Request;
@@ -15,10 +15,11 @@ use crate::model::role::SysRoleVo;
 use crate::model::user::{SysUser, UserVo};
 use crate::service::permission_service::SysPermissionService;
 use crate::service::role_service::SysRoleService;
+use crate::task::sms_task::SmsMessage;
 use crate::utils::captcha::CaptchaBuilder;
 use crate::utils::mini_redis::MiniRedis;
 use crate::utils::vec::FromVo;
-use crate::RB;
+use crate::{RB, SMS_SERVER};
 
 lazy_static! {
     pub static ref USER_LOGIN_CACHI: MiniRedis<u64> = MiniRedis::<u64>::new("UserLogin");
@@ -52,6 +53,12 @@ pub struct LoginResultVo{
 pub struct CaptchaVo {
     pub(crate) uuid: String,
     pub(crate) img: String,
+}
+
+#[derive(Serialize,Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GetSmsVerificationCodeDto{
+    pub(crate) phone_number: String,
 }
 
 pub struct LoginService;
@@ -166,15 +173,18 @@ impl LoginService {
         Ok(WebResult::success("退出成功".to_string()))
     }
 
-
-    pub async fn get_sms_verification_code() -> Http<String> {
-        // 生成6位数的验证码
+    pub async fn send_sms_verification_code(req: &mut Request) -> Http<String> {
+        let dto = req.parse_json::<GetSmsVerificationCodeDto>().await?;
+        // 生成6位数字的验证码
+        let die_range = Uniform::new_inclusive(0, 9);
         let code = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
+            .sample_iter(&die_range)
             .take(6)
-            .map(char::from)
+            .map(|n| (b'0' + n as u8) as char)
             .collect::<String>();
-
+        SMS_VERIFICATION_CODE_CACHI.set_second(dto.phone_number.as_str(), code.clone(),120).await;
+        // 改成redis后记得加判断，不然小心短信接口欠费；
+        SMS_SERVER.send_sms(SmsMessage{ phone_number: dto.phone_number, code }).await;
         Ok(WebResult::success_none())
     }
 

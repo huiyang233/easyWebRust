@@ -2,7 +2,7 @@ use crate::api::init_router;
 use crate::auth::auth_check::AuthCheck;
 use crate::config::config::load_config;
 use crate::middleware::log::log;
-use crate::task::sms_task::SMSTask;
+use crate::task::sms_task::SmsServer;
 use deadpool_redis::{Config, Runtime};
 use idgen::IDGen;
 use lazy_static::lazy_static;
@@ -13,8 +13,6 @@ use salvo::conn::Acceptor;
 use salvo::prelude::*;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::ops::Deref;
-use std::sync::Arc;
-use tokio::sync::{mpsc, Mutex};
 
 mod model;
 mod auth;
@@ -36,8 +34,9 @@ lazy_static! {
         let cfg = Config::from_url(&SERVER_CONFIG.redis_url);
         cfg.create_pool(Some(Runtime::Tokio1)).unwrap()
     };
+    // 短信服务
+    static ref SMS_SERVER:SmsServer= SmsServer::new();
 }
-
 
 
 #[tokio::main]
@@ -47,10 +46,6 @@ async fn main() {
         .with_thread_ids(true)
         .init();
     // 设置端口
-    let (tx, mut rx) = mpsc::channel::<SMSTask>(10);
-    tx.send(SMSTask { phone_number: "".to_string(), code: "".to_string() }).await.expect("TODO: panic message");
-    let rx = Arc::new(Mutex::new(rx));
-    task::sms_task::init_sms_task(rx).await;
     let database_url = &SERVER_CONFIG.db_url;
     RB.init(MysqlDriver{},&database_url).unwrap();
     // 初始化路由

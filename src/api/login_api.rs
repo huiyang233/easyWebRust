@@ -11,6 +11,8 @@ pub fn init_login_router() -> Router{
             Router::with_path("login")
                 .post(login)
                 .push(Router::with_path("verificationCode").get(get_verification_code))
+                .push(Router::with_path("sendSmsVerificationCode").post(send_sms_verification_code))
+
 
         )
         .push(
@@ -40,6 +42,12 @@ pub async fn logout(req: &mut Request) -> Http<String> {
 pub async fn change_password(req: &mut Request, depot: &mut Depot) -> Http<String> {
     UserService::change_password(req, depot).await
 }
+
+#[handler]
+pub async fn send_sms_verification_code(req: &mut Request) -> Http<String> {
+    LoginService::send_sms_verification_code(req).await
+}
+
 
 
 

@@ -35,9 +35,11 @@ idgen ="0.1.2"
 
 futures = "0.3.30"
 
-redis = { version = "0.27.5", features = ["tokio-comp","json"] }
+redis = { version = "0.27.5", features = ["tokio-comp"] }
 deadpool-redis = "0.18.0"
 
+#阿里云短信
+spring-sms = "0.1.2"
 
 
 [profile.dev]

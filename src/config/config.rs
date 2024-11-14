@@ -5,9 +5,17 @@ use std::fs;
 pub struct Config {
     pub server: Server,
     pub db_url: String,
-    pub redis_url: String
+    pub redis_url: String,
+    pub sms_config: SmsConfig,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone,Default)]
+pub struct SmsConfig{
+    pub app_key: String,
+    pub app_secret: String,
+    pub sign_name: String,
+    pub region_id: String,
+}
 #[derive(Deserialize, Serialize, Debug, Clone,Default)]
 pub struct Server{
     pub port: u16

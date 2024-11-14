@@ -1,14 +1,15 @@
+use crate::model::result::ResultError;
+use crate::{RB, REDIS_POOL};
 use deadpool_redis::PoolError;
 use rbatis::executor::RBatisTxExecutorGuard;
+use redis::aio::PubSub;
 use redis::{AsyncCommands, Connection, RedisError};
 use serde::{de, Deserialize, Serialize};
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::result;
 use tracing::error;
-
-use crate::model::result::ResultError;
-use crate::{RB, REDIS_POOL};
+use tracing::instrument::WithSubscriber;
 
 pub struct  DB;
 
