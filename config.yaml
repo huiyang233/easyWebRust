@@ -7,3 +7,9 @@ sms_config:
   app_secret: 123
   sign_name: 123
   region_id: 123
+pay:
+  app_id: 123
+  private_key: 123
+  alipay_public_key: 123
+  notify_url: 123
+  return_url: 123
