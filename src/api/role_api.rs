@@ -1,4 +1,4 @@
-use salvo::{Depot, handler, Request, Router};
+use salvo::{handler, Depot, Request, Router};
 
 use crate::auth::auth_check::{auth_check, AuthCheck};
 use crate::model::result::{Http, HttpPage};
@@ -45,7 +45,7 @@ pub async fn get_sys_role_details(req: &mut Request) -> Http<SysRoleVo> {
 
 #[handler]
 pub async fn get_sys_role_by_page(req: &mut Request,depot: &mut Depot) ->HttpPage<SysRoleVo>{
-    depot.check_permission(&["hello","hello"]).await?;
+    depot.check_permission(&["role"]).await?;
     SysRoleService::get_sys_role_by_page(req).await
 }
 

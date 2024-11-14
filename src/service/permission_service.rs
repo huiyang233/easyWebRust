@@ -3,20 +3,20 @@ use std::ops::Deref;
 
 use crypto::digest::Digest;
 use lazy_static::lazy_static;
-use rbatis::{Page, PageRequest};
 use rbatis::rbdc::DateTime;
+use rbatis::{Page, PageRequest};
 use salvo::{Depot, Request};
 
-use crate::{ID_WORKER, RB};
 use crate::auth::auth_check::AuthCheck;
 use crate::model::permission::{SysPermission, SysPermissionAddDto, SysPermissionEditDto, SysPermissionVo, Tree};
 use crate::model::result::{Http, HttpPage, PageDto, ResultError, WebResult};
 use crate::service::role_service::SysRoleService;
-use crate::utils::mini_redis::MiniRedis;
+use crate::utils::db::Redis;
+use crate::{ID_WORKER, RB};
 
 lazy_static! {
-    static ref SYS_PERMISSION_CACHI: MiniRedis<SysPermission> = MiniRedis::<SysPermission>::new("SysPermission");
-    pub static ref ROLE_PERMISSION_CACHI: MiniRedis<Vec<SysPermission>> = MiniRedis::<Vec<SysPermission>>::new("RoleSysPermission");
+    static ref SYS_PERMISSION_CACHI: Redis<SysPermission> = Redis::<SysPermission>::new("SysPermission");
+    pub static ref ROLE_PERMISSION_CACHI: Redis<Vec<SysPermission>> = Redis::<Vec<SysPermission>>::new("RoleSysPermission");
 }
 pub struct SysPermissionService;
 impl SysPermissionService{
@@ -31,7 +31,7 @@ impl SysPermissionService{
                             None => {None}
                             Some(sys_permission) => {
                                 // 权限可以永久放里面。
-                                SYS_PERMISSION_CACHI.set(id.to_string().as_str(), sys_permission.clone()).await;
+                                SYS_PERMISSION_CACHI.set(id.to_string().as_str(), sys_permission.clone()).await.ok();
                                 Some(sys_permission)
                             }
                         }
@@ -39,10 +39,7 @@ impl SysPermissionService{
                     Err(_) => { None }
                 }
             }
-            Some(sys_permission) => {
-                SYS_PERMISSION_CACHI.extend_out_time(id.to_string().as_str(), 60).await;
-                Some(sys_permission)
-            }
+            Some(sys_permission) => Some(sys_permission)
         }
     }
 
@@ -59,7 +56,7 @@ impl SysPermissionService{
                 Ok(result) => {result}
                 Err(_) => {return None;}
             };
-            ROLE_PERMISSION_CACHI.set(x.id.to_string().as_str(), result.clone()).await;
+            ROLE_PERMISSION_CACHI.set(x.id.to_string().as_str(), result.clone()).await.ok();
             result.iter().for_each(|x| {set.insert(x.clone());});
         }
         // HashSet转Vec
@@ -76,7 +73,7 @@ impl SysPermissionService{
                 let sys_permission = SysPermission::select_by_role_id(RB.deref(),role_id).await;
                 match sys_permission {
                     Ok(sys_permission) => {
-                        ROLE_PERMISSION_CACHI.set(role_id.to_string().as_str(), sys_permission.clone()).await;
+                        ROLE_PERMISSION_CACHI.set(role_id.to_string().as_str(), sys_permission.clone()).await.ok();
                         Ok(sys_permission)
                     }
                     Err(_) => { Err(ResultError::param_error("数据库查询出错".to_string())) }
@@ -165,7 +162,7 @@ impl SysPermissionService{
         database_data.name = dto.name;
         database_data.value = dto.value;
         database_data.p_id = dto.p_id;
-        SYS_PERMISSION_CACHI.set_minute(database_data.id.to_string().as_str(), database_data.clone(),10).await;
+        SYS_PERMISSION_CACHI.set(database_data.id.to_string().as_str(), database_data.clone()).await.ok();
         SysPermission::update_by_column(RB.deref(), &database_data, "id").await?;
         Ok(WebResult::success_none())
     }

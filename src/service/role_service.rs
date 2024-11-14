@@ -2,23 +2,22 @@ use std::ops::Deref;
 
 use crypto::digest::Digest;
 use lazy_static::lazy_static;
-use rbatis::{Page, PageRequest};
 use rbatis::rbdc::DateTime;
+use rbatis::{Page, PageRequest};
 use salvo::{Depot, Request};
 
-use crate::{ID_WORKER, RB};
 use crate::auth::auth_check::AuthCheck;
 use crate::model::permission::{SysPermission, SysPermissionVo};
 use crate::model::result::{Http, HttpPage, PageDto, ResultError, WebResult};
 use crate::model::role::{SysRole, SysRoleAddDto, SysRoleEditDto, SysRoleVo};
-use crate::service::permission_service::{ROLE_PERMISSION_CACHI, SysPermissionService};
-use crate::utils::db::DB;
-use crate::utils::mini_redis::MiniRedis;
+use crate::service::permission_service::{SysPermissionService, ROLE_PERMISSION_CACHI};
+use crate::utils::db::{Redis, DB};
 use crate::utils::vec::FromVo;
+use crate::{ID_WORKER, RB};
 
 lazy_static! {
-    static ref SYS_ROLE_CACHI: MiniRedis<SysRole> = MiniRedis::<SysRole>::new("SysRole");
-    pub static ref USER_SYS_ROLE_CACHI: MiniRedis<Vec<SysRole>> = MiniRedis::<Vec<SysRole>>::new("UserSysRole");
+    static ref SYS_ROLE_CACHI: Redis<SysRole> = Redis::<SysRole>::new("SysRole");
+    pub static ref USER_SYS_ROLE_CACHI: Redis<Vec<SysRole>> = Redis::<Vec<SysRole>>::new("UserSysRole");
 }
 pub struct SysRoleService;
 impl SysRoleService{
@@ -32,7 +31,7 @@ impl SysRoleService{
                         match sys_role {
                             None => {None}
                             Some(sys_role) => {
-                                SYS_ROLE_CACHI.set(id.to_string().as_str(), sys_role.clone()).await;
+                                SYS_ROLE_CACHI.set(id.to_string().as_str(), sys_role.clone()).await.ok();
                                 Some(sys_role)
                             }
                         }
@@ -41,7 +40,6 @@ impl SysRoleService{
                 }
             }
             Some(sys_role) => {
-                SYS_ROLE_CACHI.extend_out_time(id.to_string().as_str(), 60).await;
                 Some(sys_role)
             }
         }
@@ -105,7 +103,7 @@ impl SysRoleService{
             }
             Some(id) => {
                 SysRole::delete_by_id(RB.deref(), &id).await?;
-                SYS_ROLE_CACHI.remove(id.to_string().as_str()).await;
+                SYS_ROLE_CACHI.remove(id.to_string().as_str()).await.ok();
                 Ok(WebResult::success_none())
             }
         }
@@ -157,11 +155,11 @@ impl SysRoleService{
         SysRole::update_by_column(&mut tx, &database_data, "id").await?;
         tx.commit().await?;
         if !permission_vec.is_empty() {
-            ROLE_PERMISSION_CACHI.set(database_data.id.to_string().as_str(), permission_vec).await;
+            ROLE_PERMISSION_CACHI.set(database_data.id.to_string().as_str(), permission_vec).await.ok();
         }else{
-            ROLE_PERMISSION_CACHI.set(database_data.id.to_string().as_str(), vec![]).await;
+            ROLE_PERMISSION_CACHI.set(database_data.id.to_string().as_str(), vec![]).await.ok();
         }
-        SYS_ROLE_CACHI.set_minute(database_data.id.to_string().as_str(), database_data.clone(),10).await;
+        SYS_ROLE_CACHI.set(database_data.id.to_string().as_str(), database_data.clone()).await.ok();
 
         Ok(WebResult::success_none())
     }
@@ -209,7 +207,7 @@ impl SysRoleService{
         SysRole::insert(&mut tx, &database_data).await?;
         tx.commit().await?;
         if !permission_vec.is_empty() {
-            ROLE_PERMISSION_CACHI.set(database_data.id.to_string().as_str(), permission_vec).await;
+            ROLE_PERMISSION_CACHI.set(database_data.id.to_string().as_str(), permission_vec).await.ok();
         }
         Ok(WebResult::success(database_data.id.to_string()))
     }

@@ -30,7 +30,7 @@ pub fn init_sys_permission_router() -> Router{
 
 #[handler]
 pub async fn tree(depot: &mut Depot) ->Http<Vec<Tree>>{
-    depot.check_permission(&["permission:tree"]).await?;
+    depot.check_any_permission(&["permission","role:add","role:update","role"]).await?;
     SysPermissionService::tree().await
 }
 

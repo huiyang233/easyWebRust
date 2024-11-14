@@ -168,7 +168,7 @@ impl UserService{
         // if !role_ids.is_empty() {
         //     USER_SYS_ROLE_CACHI.set_minute(database_user.id.to_string().as_str(),role_vec,60).await;
         // }
-        SYS_USER_CACHI.set_minute(database_user.id.to_string().as_str(), database_user.clone(),60).await.ok();
+        SYS_USER_CACHI.set_minute(database_user.id.to_string().as_str(), database_user.clone(),3).await.ok();
 
         Ok(WebResult::success_none())
     }
@@ -249,7 +249,7 @@ impl UserService{
         }
         // 更新user进数据库
         SysUser::update_by_column(RB.deref(), &current, "id").await?;
-        SYS_USER_CACHI.set_minute(current.id.to_string().as_str(), current,60).await.ok();
+        SYS_USER_CACHI.set_minute(current.id.to_string().as_str(), current,3).await.ok();
         Ok(WebResult::success_none())
 
     }
