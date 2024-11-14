@@ -1,5 +1,4 @@
 use crate::api::init_router;
-use crate::auth::auth_check::AuthCheck;
 use crate::config::config::load_config;
 use crate::middleware::log::log;
 use crate::task::sms_task::SmsServer;
@@ -8,11 +7,7 @@ use idgen::IDGen;
 use lazy_static::lazy_static;
 use rbatis::RBatis;
 use rbdc_mysql::MysqlDriver;
-use redis::AsyncCommands;
-use salvo::conn::Acceptor;
 use salvo::prelude::*;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::ops::Deref;
 
 mod model;
 mod auth;

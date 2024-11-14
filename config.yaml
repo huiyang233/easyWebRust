@@ -1,5 +1,5 @@
 server:
-  port: 6500
+  port: 5800
 db_url: mysql://root:asd285808@localhost:3306/easy
 redis_url: redis://default:redispw@127.0.0.1/
 sms_config:

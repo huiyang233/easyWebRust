@@ -3,7 +3,7 @@ use crate::{RB, REDIS_POOL};
 use deadpool_redis::PoolError;
 use rbatis::executor::RBatisTxExecutorGuard;
 use redis::aio::PubSub;
-use redis::{AsyncCommands, Connection, RedisError};
+use redis::{AsyncCommands, Connection, RedisError, RedisResult};
 use serde::{de, Deserialize, Serialize};
 use std::marker::PhantomData;
 use std::ops::Deref;
@@ -123,19 +123,32 @@ impl <T:Serialize+ for<'de> Deserialize<'de>> Redis<T>{
 
     /// 获取Key
     /// 传入key
-    pub async fn get(&self,key: &str) -> Result<Option<T>, ResultError>{
-        let mut conn = self.get_conn().await?;
-        let result:Option<String> = conn.get(format!("{}:{}",self.name ,key)).await?;
+    pub async fn get(&self,key: &str) -> Option<T>{
+        let mut conn = match self.get_conn().await {
+            Ok(conn) => {conn}
+            Err(e) => {
+                error!("redis error:{}",e);
+                return None
+            }
+        };
+        let result:RedisResult<Option<String>> = conn.get(format!("{}:{}", self.name, key)).await;
+        let result = match result {
+            Ok(result) => {result}
+            Err(e) => {
+                error!("redis error:{}",e);
+                None
+            }
+        };
         match result {
             None => {
-                Ok(None)
+               None
             }
             Some(str) => {
                 let result = match serde_json::from_str(&str) {
-                    Ok(result) => Ok(Some(result)),
+                    Ok(result) => Some(result),
                     Err(e) => {
                         error!("error:{:?}",e);
-                        Ok(None)
+                        None
                     },
                 };
                 result
@@ -164,6 +177,26 @@ impl <T:Serialize+ for<'de> Deserialize<'de>> Redis<T>{
         let value = serde_json::to_string(&value).unwrap();
         conn.set_ex(format!("{}:{}",self.name ,key), value, out_time * 60).await?;
         Ok(())
+    }
+
+    /// 设置过期时间
+    pub async fn extend_out_time(&self,key: &str, out_time: i64) -> Result<(), ResultError> {
+        let mut conn = REDIS::get_conn().await?;
+        conn.expire(format!("{}:{}",self.name ,key), out_time).await?;
+        Ok(())
+    }
+
+    /// 设置过期时间
+    pub async fn extend_out_time_minute(&self,key: &str, out_time: i64) -> Result<(), ResultError> {
+        let mut conn = REDIS::get_conn().await?;
+        conn.expire(format!("{}:{}",self.name ,key), out_time*60).await?;
+        Ok(())
+    }
+    /// 获取过期时间
+    pub async fn get_expire(&self,key: &str) -> Result<Option<i64>, ResultError> {
+        let mut conn = REDIS::get_conn().await?;
+        let result = conn.ttl(format!("{}:{}",self.name ,key)).await?;
+        Ok(result)
     }
 
     /// 删除Key

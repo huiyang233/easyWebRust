@@ -119,7 +119,7 @@ impl<T:Serialize+ for<'de> Deserialize<'de>> MiniRedis<T>{
     }
     pub async fn get(&self, key: &str) -> Option<T> {
         // 锁定一次并在整个函数中复用
-        let mut map = MINI_REDIS_DATA.read().await;
+        let map = MINI_REDIS_DATA.read().await;
         match map.get(&format!("{}:{}",self.name.to_string() ,key)) {
             None => {
                 None

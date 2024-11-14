@@ -3,23 +3,22 @@ use std::ops::Deref;
 use crypto::digest::Digest;
 use crypto::md5::Md5;
 use lazy_static::lazy_static;
-use rbatis::{Page, PageRequest};
 use rbatis::rbdc::DateTime;
+use rbatis::{Page, PageRequest};
 use salvo::{Depot, Request};
-use tracing::info;
+use tracing::{error, info};
 
-use crate::{ID_WORKER, RB};
 use crate::auth::auth_check::AuthCheck;
 use crate::model::result::{Http, HttpPage, PageDto, ResultError, WebResult};
 use crate::model::role::{SysRole, SysRoleVo};
 use crate::model::user::{ChangePasswordDto, ChangeUserInfoDto, SysUser, UserAddDto, UserEditDto, UserVo};
 use crate::service::role_service::{SysRoleService, USER_SYS_ROLE_CACHI};
-use crate::utils::db::DB;
-use crate::utils::mini_redis::MiniRedis;
+use crate::utils::db::{Redis, DB};
 use crate::utils::vec::FromVo;
+use crate::{ID_WORKER, RB};
 
 lazy_static! {
-    static ref SYS_USER_CACHI: MiniRedis<SysUser> = MiniRedis::<SysUser>::new("SysUser");
+    static ref SYS_USER_CACHI: Redis<SysUser> = Redis::<SysUser>::new("SysUser");
 }
 pub struct UserService;
 impl UserService{
@@ -33,7 +32,7 @@ impl UserService{
                         match sys_user {
                             None => {None}
                             Some(sys_user) => {
-                                SYS_USER_CACHI.set_minute(id.to_string().as_str(), sys_user.clone(),60).await;
+                                SYS_USER_CACHI.set_minute(id.to_string().as_str(), sys_user.clone(),3).await.ok();
                                 Some(sys_user)
                             }
                         }
@@ -42,7 +41,7 @@ impl UserService{
                 }
             }
             Some(sys_user) => {
-                SYS_USER_CACHI.extend_out_time(id.to_string().as_str(),60).await;
+                SYS_USER_CACHI.extend_out_time_minute(id.to_string().as_str(), 3).await.ok();
                 Some(sys_user)
 
             }
@@ -101,7 +100,7 @@ impl UserService{
                     return return Err(ResultError::not_operation_admin())
                 }
                 SysUser::delete_by_id(RB.deref(), &id).await?;
-                SYS_USER_CACHI.remove(id.to_string().as_str()).await;
+                SYS_USER_CACHI.remove(id.to_string().as_str()).await.ok();
                 Ok(WebResult::success_none())
             }
         }
@@ -169,7 +168,7 @@ impl UserService{
         // if !role_ids.is_empty() {
         //     USER_SYS_ROLE_CACHI.set_minute(database_user.id.to_string().as_str(),role_vec,60).await;
         // }
-        SYS_USER_CACHI.set_minute(database_user.id.to_string().as_str(), database_user.clone(),60).await;
+        SYS_USER_CACHI.set_minute(database_user.id.to_string().as_str(), database_user.clone(),60).await.ok();
 
         Ok(WebResult::success_none())
     }
@@ -250,7 +249,7 @@ impl UserService{
         }
         // 更新user进数据库
         SysUser::update_by_column(RB.deref(), &current, "id").await?;
-        SYS_USER_CACHI.set_minute(current.id.to_string().as_str(), current,60).await;
+        SYS_USER_CACHI.set_minute(current.id.to_string().as_str(), current,60).await.ok();
         Ok(WebResult::success_none())
 
     }
@@ -272,7 +271,7 @@ impl UserService{
             current.avatar = user.avatar;
         }
         SysUser::update_by_column(RB.deref(), &current, "id").await?;
-        SYS_USER_CACHI.set_minute(current.id.to_string().as_str(), current,60).await;
+        SYS_USER_CACHI.set_minute(current.id.to_string().as_str(), current,60).await.ok();
         Ok(WebResult::success_none())
     }
 

@@ -1,4 +1,4 @@
-use salvo::{Depot, handler, Request, Router};
+use salvo::{handler, Depot, Request, Router};
 
 use crate::auth::auth_check::{auth_check, AuthCheck};
 use crate::model::permission::{SysPermissionVo, Tree};
@@ -22,7 +22,9 @@ pub fn init_sys_permission_router() -> Router{
             Router::with_path("permission")
                 .hoop(auth_check)
                 .post(add_sys_permission_by_id)
-                .push(Router::new().path("<id>").patch(edit_sys_permission_by_id).delete(delete_sys_permission_by_id))
+                .push(Router::new().path("<id>")
+                    .patch(edit_sys_permission_by_id)
+                    .delete(delete_sys_permission_by_id))
         )
 }
 

@@ -17,16 +17,16 @@ use crate::service::permission_service::SysPermissionService;
 use crate::service::role_service::SysRoleService;
 use crate::task::sms_task::SmsMessage;
 use crate::utils::captcha::CaptchaBuilder;
-use crate::utils::mini_redis::MiniRedis;
+use crate::utils::db::Redis;
 use crate::utils::vec::FromVo;
 use crate::{RB, SMS_SERVER};
 
 lazy_static! {
-    pub static ref USER_LOGIN_CACHI: MiniRedis<u64> = MiniRedis::<u64>::new("UserLogin");
+    pub static ref USER_LOGIN_CACHI: Redis<u64> = Redis::<u64>::new("UserLogin");
     // 短信验证
-    pub static ref SMS_VERIFICATION_CODE_CACHI: MiniRedis<String> = MiniRedis::<String>::new("SmsVerificationCode");
+    pub static ref SMS_VERIFICATION_CODE_CACHI: Redis<String> = Redis::<String>::new("SmsVerificationCode");
     // 验证码
-    pub static ref VERIFICATION_CODE_CACHI: MiniRedis<String> = MiniRedis::<String>::new("VerificationCode");
+    pub static ref VERIFICATION_CODE_CACHI: Redis<String> = Redis::<String>::new("VerificationCode");
 }
 
 #[derive(Serialize,Deserialize)]
@@ -77,7 +77,7 @@ impl LoginService {
             if verification_code.unwrap().to_lowercase() != dto.verification_code.unwrap().to_lowercase() {
                 return Err(ResultError::param_error("验证码错误".to_string()));
             }
-            VERIFICATION_CODE_CACHI.remove(&dto.verification_code_uuid.clone().unwrap()).await;
+            VERIFICATION_CODE_CACHI.remove(&dto.verification_code_uuid.clone().unwrap()).await.ok();
 
             user = SysUser::select_by_user_name(RB.deref(), &dto.username).await?;
             let user = match user {
@@ -123,7 +123,7 @@ impl LoginService {
             };
             let permissions = Vec::<SysPermissionVo>::from_vo(permissions);
             let token = Uuid::new().to_string();
-            USER_LOGIN_CACHI.set_minute( token.as_str(), user.id, 60*24).await;
+            USER_LOGIN_CACHI.set_minute( token.as_str(), user.id, 60*24).await.ok();
 
             Ok(WebResult::success(LoginResultVo{
                 token,
@@ -156,7 +156,7 @@ impl LoginService {
             };
             let permissions = Vec::<SysPermissionVo>::from_vo(permissions);
             let token = Uuid::new().to_string();
-            USER_LOGIN_CACHI.set_minute( token.as_str(), user.id, 60*24).await;
+            USER_LOGIN_CACHI.set_minute( token.as_str(), user.id, 60*24).await.ok();
 
             Ok(WebResult::success(LoginResultVo{
                 token,
@@ -169,7 +169,7 @@ impl LoginService {
 
     pub async fn logout(req: &mut Request) -> Http<String> {
         let token = req.header::<String>("Authorization").unwrap();
-        USER_LOGIN_CACHI.remove(&*token).await;
+        USER_LOGIN_CACHI.remove(&*token).await.ok();
         Ok(WebResult::success("退出成功".to_string()))
     }
 
@@ -182,7 +182,7 @@ impl LoginService {
             .take(6)
             .map(|n| (b'0' + n as u8) as char)
             .collect::<String>();
-        SMS_VERIFICATION_CODE_CACHI.set_second(dto.phone_number.as_str(), code.clone(),120).await;
+        SMS_VERIFICATION_CODE_CACHI.set_second(dto.phone_number.as_str(), code.clone(),120).await.ok();
         // 改成redis后记得加判断，不然小心短信接口欠费；
         SMS_SERVER.send_sms(SmsMessage{ phone_number: dto.phone_number, code }).await;
         Ok(WebResult::success_none())
@@ -199,7 +199,7 @@ impl LoginService {
             .build();
 
         let uuid = Uuid::new().to_string();
-        VERIFICATION_CODE_CACHI.set_minute(uuid.as_str(), captcha.text.clone(), 2).await;
+        VERIFICATION_CODE_CACHI.set_minute(uuid.as_str(), captcha.text.clone(), 2).await.ok();
         Ok(WebResult::success(CaptchaVo{ uuid, img: captcha.to_base64() }))
     }
 }

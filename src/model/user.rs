@@ -1,8 +1,7 @@
-use rbatis::executor::Executor;
 use rbatis::rbdc::db::ExecResult;
 use rbatis::rbdc::DateTime;
 use rbatis::{crud, impl_select, impl_select_page, sql, RBatis};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 
 use crate::model::role::SysRoleVo;
 use crate::utils::serialize::deserialize_bool;
