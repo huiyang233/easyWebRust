@@ -82,10 +82,12 @@ impl SmsServer{
         self.tx.send(message).await.unwrap();
     }
 
+
     pub fn new()->SmsServer{
         let config = SERVER_CONFIG.sms_config.clone();
         let sms = AliSms::new(config.app_key, config.app_secret, config.sign_name, config.region_id);
         let (tx, mut rx) =  mpsc::channel::<SmsMessage>(10);
+        info!("短信服务初始化成功");
         tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
                 // 处理发送短信任务
