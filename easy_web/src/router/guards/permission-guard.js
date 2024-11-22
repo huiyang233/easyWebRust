@@ -1,0 +1,32 @@
+/**********************************
+ * @Author: Ronnie Zhang
+ * @LastEditor: Ronnie Zhang
+ * @LastEditTime: 2023/12/05 21:25:07
+ * @Email: zclzone@outlook.com
+ * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
+ **********************************/
+
+import { useAuthStore } from '@/store'
+import api from '@/api'
+
+const WHITE_LIST = ['/login', '/404','/frontEnd']
+export function createPermissionGuard(router) {
+  router.beforeEach(async (to) => {
+    const authStore = useAuthStore()
+    const token = authStore.accessToken
+
+    /** 没有token */
+    if (!token) {
+      if (WHITE_LIST.includes(to.path)) return true
+      return { path: 'frontEnd', query: { ...to.query, redirect: to.path } }
+    }
+
+    // 有token的情况
+    if (to.path === '/login') return { path: '/' }
+    if (WHITE_LIST.includes(to.path)) return true
+
+    const routes = router.getRoutes()
+    if (routes.find((route) => route.name === to.name)) return true
+
+  })
+}
