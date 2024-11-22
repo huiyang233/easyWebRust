@@ -63,6 +63,11 @@ pub struct GetSmsVerificationCodeDto{
 
 pub struct LoginService;
 impl LoginService {
+
+    pub async fn wx_login(req: &mut Request) -> Http<LoginResultVo> {
+        let dto = req.parse_json::<LoginDto>().await?;
+        Err(ResultError::param_error("用户被禁用,请联系管理员".to_string()))
+    }
     pub async fn login(req: &mut Request) -> Http<LoginResultVo> {
         let dto = req.parse_json::<LoginDto>().await?;
         let mut user = None;

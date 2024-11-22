@@ -1,6 +1,7 @@
 use crate::api::init_router;
 use crate::config::config::load_config;
 use crate::middleware::log::log;
+use crate::task::scheduler::init_scheduler;
 use crate::task::sms_task::SmsServer;
 use deadpool_redis::{Config, Runtime};
 use idgen::IDGen;
@@ -40,6 +41,8 @@ async fn main() {
     tracing_subscriber::fmt()
         .with_thread_ids(true)
         .init();
+    // 定时任务初始化
+    init_scheduler().await;
     // 设置端口
     let database_url = &SERVER_CONFIG.db_url;
     RB.init(MysqlDriver{},&database_url).unwrap();

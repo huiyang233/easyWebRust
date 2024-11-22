@@ -29,6 +29,11 @@ pub async fn login(req: &mut Request) -> Http<LoginResultVo> {
 }
 
 #[handler]
+pub async fn wx_login(req: &mut Request) -> Http<LoginResultVo> {
+    LoginService::login(req).await
+}
+
+#[handler]
 pub async fn get_verification_code() -> Http<CaptchaVo> {
     LoginService::get_verification_code().await
 }
