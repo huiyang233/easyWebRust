@@ -7,6 +7,10 @@ use crate::service::login_service::USER_LOGIN_CACHI;
 use crate::service::permission_service::SysPermissionService;
 use crate::service::user_service::UserService;
 
+///
+/// 权限验证中间件
+/// 验证成功后会给用户信息放到 depot 中 depot.obtain::<SysUser>(); 可以取出来
+///
 #[handler]
 pub async fn auth_check(req: &mut Request, depot: &mut Depot, _res: &mut Response, ctrl: &mut FlowCtrl) ->Result<(),ResultError> {
     let token = req.header::<String>("Authorization");
@@ -113,7 +117,10 @@ impl PermissionsCheck<&str> for AuthDetails {
     }
 }
 
-
+///
+/// 对Depot实现AuthCheck
+/// 主要作用是取用户和权限校验
+///
 impl AuthCheck for Depot {
     fn get_user(&self)->Result<&SysUser,ResultError> {
         let user = self.obtain::<SysUser>();
