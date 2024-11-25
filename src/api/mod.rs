@@ -14,6 +14,9 @@ mod file_api;
 mod agent_info_api;
 mod merchant_info_api;
 
+///
+/// ## 所有路由初始化
+///
 pub fn init_router() ->Router {
     Router::new()
         .push(init_user_router())
