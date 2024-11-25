@@ -1,3 +1,7 @@
+///
+///方便Vec ToVo
+///
+
 pub trait FromVo<V> {
     fn from_vo(arg: Vec<V>) -> Self;
 }

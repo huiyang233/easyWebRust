@@ -11,6 +11,9 @@ use rand::{thread_rng, Rng};
 use rusttype::{Font, Scale};
 
 use crate::utils::captcha;
+///
+/// 验证码生成器
+///
 
 // Define the verification code characters.
 // Remove 0, O, I, L and other easily confusing letters

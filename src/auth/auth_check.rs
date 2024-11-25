@@ -8,8 +8,8 @@ use crate::service::permission_service::SysPermissionService;
 use crate::service::user_service::UserService;
 
 ///
-/// 权限验证中间件
-/// 验证成功后会给用户信息放到 depot 中 depot.obtain::<SysUser>(); 可以取出来
+///## 权限验证中间件
+///验证成功后会给用户信息放到 depot 中; `depot.obtain::<SysUser>();` 可以取出来
 ///
 #[handler]
 pub async fn auth_check(req: &mut Request, depot: &mut Depot, _res: &mut Response, ctrl: &mut FlowCtrl) ->Result<(),ResultError> {
@@ -117,9 +117,10 @@ impl PermissionsCheck<&str> for AuthDetails {
     }
 }
 
-///
-/// 对Depot实现AuthCheck
+/// ## 权限校验
+/// 对 Depot 实现 AuthCheck
 /// 主要作用是取用户和权限校验
+/// 在 handler 中获取到 `depot: &mut Depot` 然后 `depot.check_permission(&["agent_info"]).await?;`
 ///
 impl AuthCheck for Depot {
     fn get_user(&self)->Result<&SysUser,ResultError> {

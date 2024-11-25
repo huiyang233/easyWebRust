@@ -10,8 +10,9 @@ use tokio::runtime::Runtime;
 use tokio::sync::{Mutex, RwLock};
 use tracing::{error, info};
 
-/// 实现一个本地的Redis
-/// 用Map存储信息 想法是这样的这个Mini的Reids
+///
+/// 本地的Redis
+///
 
 lazy_static! {
     static ref MINI_REDIS_DATA:Arc<RwLock<HashMap<String,Data>>> =

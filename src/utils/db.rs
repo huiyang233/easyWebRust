@@ -12,6 +12,10 @@ use tracing::error;
 use tracing::instrument::WithSubscriber;
 
 pub struct  DB;
+///
+/// ## 数据库事务
+/// 传入`Executor`类型的 Dao 即可
+///
 
 impl DB{
     pub async fn get_transaction() -> RBatisTxExecutorGuard {
@@ -31,6 +35,9 @@ impl DB{
 }
 
 pub struct REDIS;
+///
+/// redis工具类,功能拉齐MiniRedis。
+///
 impl REDIS{
 
     ///获取连接

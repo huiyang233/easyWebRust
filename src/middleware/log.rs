@@ -1,13 +1,9 @@
 use crate::model::result::ResultError;
 use salvo::{handler, Depot, FlowCtrl, Request, Response};
-use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Debug, Clone,Default)]
-struct Test{
-    a:String,
-    b:String
-}
-
+///
+/// 打印请求和响应日志中间件
+///
 #[handler]
 pub async fn log(req: &mut Request, depot: &mut Depot, res: &mut Response, ctrl: &mut FlowCtrl)->Result<(),ResultError> {
     // info!("之前req:{:?}",req.headers());

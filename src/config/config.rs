@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
-
+///
+/// ## 读取配置和添加配置
+/// 如果需要添加配置将结构体添加至Config中。
+/// CONFIG有全局变量，可以直接使用。
+///
 #[derive(Deserialize, Serialize, Debug, Clone,Default)]
 pub struct Config {
     pub server: Server,

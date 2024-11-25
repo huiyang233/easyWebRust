@@ -1,9 +1,13 @@
 use std::str::FromStr;
 
 use rbatis::rbdc::DateTime;
-use serde::{de, Deserialize, Deserializer, Serializer};
 use serde::de::{Error, Visitor};
 use serde::ser::SerializeSeq;
+use serde::{de, Deserialize, Deserializer, Serializer};
+
+///
+/// ## 序列化相关的内容
+///
 
 pub fn serialize_id<S>(data: &u64, s: S) -> Result<S::Ok, S::Error>
     where S: Serializer, {
