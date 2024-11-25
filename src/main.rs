@@ -27,6 +27,7 @@ lazy_static! {
     static ref ID_WORKER:IDGen = IDGen::new(127);
     // Redis
     static ref REDIS_POOL:deadpool_redis::Pool = {
+        // 初始化Redis连接池
         let cfg = Config::from_url(&SERVER_CONFIG.redis_url);
         cfg.create_pool(Some(Runtime::Tokio1)).unwrap()
     };
@@ -44,8 +45,7 @@ async fn main() {
     // 定时任务初始化
     init_scheduler().await;
     // 设置端口
-    let database_url = &SERVER_CONFIG.db_url;
-    RB.init(MysqlDriver{},&database_url).unwrap();
+    RB.init(MysqlDriver{},&SERVER_CONFIG.db_url).unwrap();
     // 初始化路由
     let router = init_router();
     // 初始化服务
