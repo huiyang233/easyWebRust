@@ -8,6 +8,7 @@ use idgen::IDGen;
 use lazy_static::lazy_static;
 use rbatis::RBatis;
 use rbdc_mysql::MysqlDriver;
+use salvo::cors::{Any, Cors};
 use salvo::prelude::*;
 
 mod model;
@@ -48,8 +49,16 @@ async fn main() {
     RB.init(MysqlDriver{},&SERVER_CONFIG.db_url).unwrap();
     // 初始化路由
     let router = init_router();
+
+    let cors_handler = Cors::new()
+        .allow_origin(Any)
+        .allow_credentials(false)
+        .allow_methods(Any)
+        .allow_headers(Any)
+        .into_handler();
     // 初始化服务
-    let service = Service::new(router).hoop(log);
+    let service = Service::new(router).hoop(log).hoop(cors_handler);
+
 
 
     //// 证书
