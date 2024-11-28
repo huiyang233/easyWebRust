@@ -39,12 +39,12 @@
           <n-tag class="mr-4" :bordered="false" v-for="role in rowData.roles" :key="role.id" type="success">{{ role.name }}</n-tag>
         </template>
       </x-n-data-table-column>
-      <x-n-data-table-column width="150" key="enable" title="是否启用">
+      <x-n-data-table-column v-if="usePermission.hasPermissions(['user:update'])" width="150" key="enable" title="是否启用">
         <template #render-cell="{ rowData }">
           <n-switch :disabled="rowData.id==1" :rubber-band="false" type="small" :loading="rowData.enableLoading" :value="rowData.enable" @update-value="handleEnable(rowData)" />
         </template>
       </x-n-data-table-column>
-      <x-n-data-table-column width="150" key="isSuperAdmin" title="超级管理员">
+      <x-n-data-table-column v-if="usePermission.hasPermissions(['user:update'])" width="150" key="isSuperAdmin" title="超级管理员">
         <template #render-cell="{ rowData }">
           <n-switch :disabled="rowData.id==1" :rubber-band="false" type="small" :loading="rowData.isSuperAdminLoading" :value="rowData.isSuperAdmin" @update-value="handleIsSuperAdmin(rowData)" />
         </template>
@@ -52,14 +52,14 @@
 
       <x-n-data-table-column width="200" key="createTime" title="创建时间" />
 
-      <x-n-data-table-column width="200" align="center" fixed="right" key="actions" title="操作">
+      <x-n-data-table-column v-if="usePermission.hasAnyPermissions(['user:del','user:update'])" width="200" align="center" fixed="right" key="actions" title="操作">
         <template #render-cell="{ column, rowData, rowIndex }">
           <n-button v-permission="['user:update']" :disabled="rowData.id==1" size="small" type="primary" @click="handleEdit(rowData)">
-            <i  class="i-material-symbols:edit-outline text-14 mr-4"></i>
+            <i class="i-material-symbols:edit-outline text-14 mr-4"></i>
             编辑
           </n-button>
           <n-button v-permission="['user:del']" :disabled="rowData.id==1" size="small" style="margin-left: 12px" type="error" @click="handleDelete(rowData.id)">
-            <i  class="i-material-symbols:delete-outline text-14 mr-4"></i>
+            <i class="i-material-symbols:delete-outline text-14 mr-4"></i>
             删除</n-button>
         </template>
       </x-n-data-table-column>
@@ -145,8 +145,11 @@ import { NButton, NSwitch, NTag } from 'naive-ui'
 import api from './api'
 import { XNDataTable, XNDataTableColumn } from '@skit/x.naive-ui'
 import { AppCard, CommonPage, MeQueryItem } from '@/components/index.js'
+import {usePermissionStore} from '@/store'
 
 defineOptions({ name: 'UserMgt' })
+
+const usePermission = usePermissionStore()
 
 const roles = ref([])
 const tableData = ref([])

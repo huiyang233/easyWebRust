@@ -10,6 +10,7 @@ import {usePermissionStore} from '@/store'
 
 const permission = {
   mounted(el, binding) {
+    console.log("binding.value",binding.value,el)
     const usePermission = usePermissionStore()
     if(!usePermission.hasPermissions(binding.value)){
       el.remove()
@@ -20,6 +21,7 @@ const permission = {
 const anyPermission = {
   mounted(el, binding) {
     const usePermission = usePermissionStore()
+    console.log("binding.value",binding.value)
     if(!usePermission.hasAnyPermissions(binding.value)){
       el.remove()
     }
@@ -29,6 +31,6 @@ const anyPermission = {
 
 export function setupDirectives(app) {
   app.directive('permission', permission)
-  app.directive('any_permission', anyPermission)
+  app.directive('any-permission', anyPermission)
 
 }

@@ -37,7 +37,7 @@
 
     <x-n-data-table :loading="loading" :pagination="pagination" :data="tableData"  @update:page="onPageChange">
       <x-n-data-table-column max-width="100" key="name" title="角色名" />
-      <x-n-data-table-column max-width="100" fixed="right" align="right"  key="actions" title="操作">
+      <x-n-data-table-column v-if="usePermission.hasAnyPermissions(['role:del','role:update'])" max-width="100" fixed="right" align="right"  key="actions" title="操作">
         <template #render-cell="{ column, rowData, rowIndex }">
           <n-button v-permission="['role:update']" :disabled="rowData.id==1" size="small" type="primary" @click="handleEdit(rowData)">
             <i  class="i-material-symbols:edit-outline text-14 mr-4"></i>
@@ -108,8 +108,12 @@ import api from './api'
 import CascadeTree from './components/CascadeTree.vue'
 import { CommonPage } from '@/components/index.js'
 import { XNDataTable, XNDataTableColumn } from '@skit/x.naive-ui'
+import {usePermissionStore} from '@/store'
 
 defineOptions({ name: 'RoleMgt' })
+
+const usePermission = usePermissionStore()
+
 
 const tableData = ref([])
 const loading = ref(false)
