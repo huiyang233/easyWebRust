@@ -135,6 +135,15 @@ impl UserService{
             }
         }
         // 有密码然后加密
+        match user.password.clone() {
+            None => {}
+            Some(password) => {
+                if password.len() < 8 {
+                    return Err(ResultError::param_error("密码长度不能小于8位".to_string()))
+                }
+            }
+        }
+
         user.password.map(|password| {
             let mut md5 = Md5::new();
             md5.input_str(password.as_str());
@@ -203,6 +212,10 @@ impl UserService{
         database_user.user_name = user.user_name;
         database_user.phone_number = user.phone_number;
         database_user.id = ID_WORKER.new_id();
+
+        if user.password.len() < 8 {
+            return Err(ResultError::param_error("密码长度不能小于8位".to_string()))
+        }
         // 有密码然后加密
         let mut md5 = Md5::new();
         md5.input_str(user.password.as_str());
@@ -241,8 +254,12 @@ impl UserService{
         }
 
         if user.new_password.is_some() {
+            let new_password = user.new_password.unwrap();
+            if new_password.len() < 8 {
+                return Err(ResultError::param_error("密码长度不能小于8位".to_string()))
+            }
             let mut md5 = Md5::new();
-            md5.input_str(user.new_password.unwrap().as_str());
+            md5.input_str(new_password.as_str());
             current.password = Some(md5.result_str());
         }else{
             return Err(ResultError::param_error("新密码不能为空".to_string()))
