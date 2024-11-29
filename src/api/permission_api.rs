@@ -7,7 +7,6 @@ use crate::service::permission_service::SysPermissionService;
 
 pub fn init_sys_permission_router() -> Router{
     Router::new()
-        // 如果查询不需要登录请删除 hoop，权限检查也记得一并删除。
         .push(
             Router::with_path("permission")
                 .hoop(auth_check)

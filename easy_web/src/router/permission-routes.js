@@ -43,7 +43,6 @@ export const permissionRoutes = [
             name: '创建新用户'
           }]
         }
-
       },
       {
         name: 'RoleManagement',
@@ -52,13 +51,39 @@ export const permissionRoutes = [
         component: () => import('@/views/pms/role/index.vue'),
         meta: {
           title: '角色管理',
-          icon: 'i-fe:user',
+          icon: 'i-fe:users',
           show: true,
           keepAlive: null,
           btns: [{
             code: 'AddRole',
             name: '新建角色'
           }]
+        }
+
+      },
+      {
+        name: 'PermissionManagement',
+        path: '/systemManagement/permissionManagement',
+        permission: ['log'],
+        component: () => import('@/views/pms/permission/index.vue'),
+        meta: {
+          title: '权限管理',
+          icon: 'i-fe:key',
+          show: true,
+          keepAlive: null,
+        }
+
+      },
+      {
+        name: 'LogManagement',
+        path: '/systemManagement/logManagement',
+        permission: ['log'],
+        component: () => import('@/views/pms/log/index.vue'),
+        meta: {
+          title: '日志管理',
+          icon: 'i-fe:edit',
+          show: true,
+          keepAlive: null,
         }
 
       }

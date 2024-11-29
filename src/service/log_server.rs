@@ -1,12 +1,12 @@
 use std::ops::Deref;
 
-use rbatis::rbdc::DateTime;
-use rbatis::{Page, PageRequest};
-use salvo::Request;
-
 use crate::model::log::{SysLog, SysLogPageReq, SysLogVo};
 use crate::model::result::{Http, HttpPage, PageDto, ResultError, WebResult};
 use crate::{ID_WORKER, RB};
+use rbatis::rbdc::DateTime;
+use rbatis::{Page, PageRequest};
+use salvo::Request;
+use tracing::info;
 
 pub struct SysLogService;
 static LOG_TYPE_LOGIN: i32 = 1;
@@ -54,6 +54,7 @@ impl SysLogService {
         let page_dto = req.parse_queries::<PageDto>().unwrap_or_else(|_| PageDto { page: 0, page_size: 10 });
         let page_request = PageRequest::from(page_dto);
         let item: SysLogPageReq = req.parse_queries()?;
+        info!("item:{:?}", item);
         let page = SysLog::select_page(RB.deref(), &page_request, item).await?;
         let page_vo = Page::<SysLogVo>::from(page);
         Ok(WebResult::success_page(page_vo))

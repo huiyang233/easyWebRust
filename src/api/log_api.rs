@@ -16,6 +16,7 @@ pub fn init_sys_log_router() -> Router{
                 .push(Router::new().path("<id>").get(get_sys_log_details)),
         ).push(
         Router::with_path("report")
+            .hoop(auth_check)
             .get(select_login_count_by_seven_day)
     )
 }
@@ -30,8 +31,6 @@ pub async fn get_sys_log_by_page(req: &mut Request,depot: &mut Depot) ->HttpPage
 pub async fn select_login_count_by_seven_day(req: &mut Request,depot: &mut Depot) ->Http<Value>{
     SysReport::select_login_count_by_seven_day().await
 }
-
-
 
 
 #[handler]

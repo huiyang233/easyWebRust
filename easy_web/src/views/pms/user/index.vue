@@ -11,7 +11,7 @@
       <n-form class="flex justify-between p-16" @submit.prevent="handleSearch()">
         <n-space wrap :size="[32, 16]">
           <MeQueryItem label="用户名" :label-width="50">
-            <n-input type="text" v-model:value="queryItems.userName" placeholder="请输入角色名" clearable />
+            <n-input type="text" v-model:value="queryItems.userName" placeholder="请输入用户名" clearable />
           </MeQueryItem>
 
           <MeQueryItem label="手机号" :label-width="50">
@@ -52,7 +52,7 @@
 
       <x-n-data-table-column width="200" key="createTime" title="创建时间" />
 
-      <x-n-data-table-column v-if="usePermission.hasAnyPermissions(['user:del','user:update'])" width="200" align="center" fixed="right" key="actions" title="操作">
+      <x-n-data-table-column v-if="usePermission.hasAnyPermissions(['user:del','user:update'])" width="200" align="right"  fixed="right" key="actions" title="操作">
         <template #render-cell="{ column, rowData, rowIndex }">
           <n-button v-permission="['user:update']" :disabled="rowData.id==1" size="small" type="primary" @click="handleEdit(rowData)">
             <i class="i-material-symbols:edit-outline text-14 mr-4"></i>

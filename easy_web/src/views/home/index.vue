@@ -76,14 +76,7 @@ const trendOption = ref({
                     yAxis: [
                       {
                         type: 'value',
-
-                        axisLabel: {
-                          formatter: '{value}',
-                        },
-                      },
-                      {
-                        type: 'value',
-
+                        interval: 1,
                         axisLabel: {
                           formatter: '{value}',
                         },

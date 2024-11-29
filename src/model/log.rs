@@ -30,9 +30,20 @@ impl SysLog {
 crud!(SysLog{});
 impl_select_page!( SysLog{select_page(item:SysLogPageReq) =>"
       where 1=1
-     if item.name != null && item.name != '':
-       ` and item.name like CONCAT('%', #{item.name}, '%') `"
+     if item.user_name != null && item.user_name != '':
+       ` and user_name like CONCAT('%', #{item.user_name}, '%') `
+     if item.log_type != null && item.log_type != '':
+       ` and log_type = #{item.log_type}`
+      if item.start_time != null && item.start_time != '':
+       ` and create_time >= #{item.start_time}`
+      if item.end_time != null && item.end_time != '':
+       ` and create_time <= #{item.end_time}`
+     "
+
+
+
 });
+
 
 
 impl From<SysLog> for SysLogVo {
@@ -64,7 +75,10 @@ pub struct SysLogVo {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(rename_all(serialize = "camelCase"))]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct SysLogPageReq {
-    pub name: Option<String>,
+    pub user_name: Option<String>,
+    pub log_type: Option<i32>,
+    pub start_time: Option<DateTime>,
+    pub end_time: Option<DateTime>,
 }
