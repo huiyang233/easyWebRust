@@ -176,20 +176,23 @@ impl From<rbatis::rbdc::Error> for ResultError {
 }
 
 impl From<ParseError> for ResultError{
-    fn from(value: ParseError) -> Self {
-        ResultError::param_error(value.to_string())
+    fn from(err: ParseError) -> Self {
+        error!("ParseError error:{}",err);
+        ResultError::param_error(err.to_string())
     }
 }
 
 impl From<PoolError> for ResultError{
-    fn from(value: PoolError) -> Self {
-        ResultError::param_error(value.to_string())
+    fn from(err: PoolError) -> Self {
+        error!("PoolError error:{}",err);
+        ResultError::param_error(err.to_string())
     }
 }
 
 impl From<RedisError> for ResultError{
-    fn from(value: RedisError) -> Self {
-        ResultError::param_error(value.to_string())
+    fn from(err: RedisError) -> Self {
+        error!("RedisError error:{}",err);
+        ResultError::param_error(err.to_string())
     }
 }
 
