@@ -4,3 +4,4 @@ pub mod role;
 pub mod permission;
 pub mod agent_info;
 pub mod merchant_info;
+pub mod log;

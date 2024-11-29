@@ -6,6 +6,7 @@ use salvo::prelude::Json;
 use salvo::{async_trait, Depot, Request, Response, Writer};
 use serde::{Deserialize, Serialize};
 use std::string::ToString;
+use tracing::error;
 
 #[derive(Serialize,Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -169,6 +170,7 @@ impl ResultError{
 
 impl From<rbatis::rbdc::Error> for ResultError {
     fn from(err: rbatis::rbdc::Error) -> Self {
+        error!("rbatis error:{}",err);
         ResultError::system_error()
     }
 }

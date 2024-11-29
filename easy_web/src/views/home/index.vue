@@ -20,13 +20,14 @@
       </n-card>
     </div>
    
-    <n-card class="mt-12" title="员工登录数" segmented>
+    <n-card class="mt-12" title="用户登录数" segmented>
       <VChart :option="trendOption" :init-options="{ height: 400 }" autoresize />
     </n-card>
   </AppPage>
 </template>
 
 <script setup>
+import { throttle } from '@/utils'
 import { useUserStore } from '@/store'
 import * as echarts from 'echarts/core'
 import { TooltipComponent, GridComponent, LegendComponent } from 'echarts/components'
@@ -34,6 +35,7 @@ import { BarChart, LineChart, PieChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
+import api from './api'
 
 const userStore = useUserStore()
 
@@ -48,109 +50,70 @@ echarts.use([
   PieChart,
 ])
 
-const trendOption = {
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      type: 'cross',
-      crossStyle: {
-        color: '#999',
-      },
-    },
-  },
-  legend: {
-    top: '5%',
-    data: ['登录数', '签到数'],
-  },
-  xAxis: [
-    {
-      type: 'category',
-      data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-      axisPointer: {
-        type: 'shadow',
-      },
-    },
-  ],
-  yAxis: [
-    {
-      type: 'value',
-      min: 0,
-      max: 3000,
-      interval: 500,
-      axisLabel: {
-        formatter: '{value}',
-      },
-    },
-    {
-      type: 'value',
-      min: 0,
-      max: 500,
-      interval: 100,
-      axisLabel: {
-        formatter: '{value}',
-      },
-    },
-  ],
-  series: [
-    {
-      name: '签到数',
-      type: 'line',
-      data: [200, 320, 520, 550, 600, 805, 888, 950, 1300, 2503, 2702, 2712],
-    },
-    {
-      name: '登录数',
-      yAxisIndex: 1,
-      type: 'bar',
-      data: [40, 72, 110, 115, 121, 175, 180, 201, 260, 398, 423, 455],
-    },
-  ],
-}
+const trendOption = ref({
+                    tooltip: {
+                      trigger: 'axis',
+                      axisPointer: {
+                        type: 'cross',
+                        crossStyle: {
+                          color: '#999',
+                        },
+                      },
+                    },
+                    legend: {
+                      top: '5%',
+                      data: ['登录数'],
+                    },
+                    xAxis: [
+                      {
+                        type: 'category',
+                        data: [],
+                        axisPointer: {
+                          type: 'shadow',
+                        },
+                      },
+                    ],
+                    yAxis: [
+                      {
+                        type: 'value',
 
-const skillOption = {
-  tooltip: {
-    trigger: 'item',
-    formatter({ name, value }) {
-      return `${name} ${value}%`
-    },
-  },
-  legend: {
-    left: 'center',
-  },
-  series: [
-    {
-      top: '12%',
-      type: 'pie',
-      radius: ['35%', '90%'],
-      avoidLabelOverlap: true,
-      itemStyle: {
-        borderRadius: 10,
-        borderColor: '#fff',
-        borderWidth: 2,
-      },
-      label: {
-        show: false,
-        position: 'center',
-      },
-      emphasis: {
-        label: {
-          show: true,
-          fontSize: 36,
-          fontWeight: 'bold',
-        },
-      },
-      labelLine: {
-        show: false,
-      },
-      data: [
-        { value: 38.5, name: 'Vue' },
-        { value: 37.0, name: 'JavaScript' },
-        { value: 6.5, name: 'CSS' },
-        { value: 6.2, name: 'HTML' },
-        { value: 1.8, name: 'Other' },
-      ],
-    },
-  ],
-}
+                        axisLabel: {
+                          formatter: '{value}',
+                        },
+                      },
+                      {
+                        type: 'value',
+
+                        axisLabel: {
+                          formatter: '{value}',
+                        },
+                      },
+                    ],
+                    series: [
+                      {
+                        name: '登录数',
+                        type: 'line',
+                        data: [200, 320, 520, 550, 600, 805, 888, 950, 1300, 2503, 2702, 2712],
+                      },
+                    ],
+                  })
+
+
+
+const initCaptcha = throttle(async() => {
+  const {flag,data} = await api.getLoginCountData()
+  console.log(flag,data)
+  if (!flag){
+    $message.error('验证码获取失败', { key: 'getLoginCountData' })
+    return
+  }
+  trendOption.value.xAxis[0].data = data.map(item => item.login_date)
+  trendOption.value.series[0].data = data.map(item => item.login_count)
+  console.log(trendOption.value)
+
+}, 500)
+
+initCaptcha()
 
 const message = $message
 </script>

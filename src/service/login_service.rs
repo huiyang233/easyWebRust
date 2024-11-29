@@ -13,6 +13,7 @@ use crate::model::permission::SysPermissionVo;
 use crate::model::result::{Http, ResultError, WebResult};
 use crate::model::role::SysRoleVo;
 use crate::model::user::{SysUser, UserVo};
+use crate::service::log_server::SysLogService;
 use crate::service::permission_service::SysPermissionService;
 use crate::service::role_service::SysRoleService;
 use crate::task::sms_task::SmsMessage;
@@ -69,6 +70,7 @@ impl LoginService {
         Err(ResultError::param_error("用户被禁用,请联系管理员".to_string()))
     }
     pub async fn login(req: &mut Request) -> Http<LoginResultVo> {
+
         let dto = req.parse_json::<LoginDto>().await?;
         let mut user = None;
         if dto.login_type==1 {
@@ -129,7 +131,7 @@ impl LoginService {
             let permissions = Vec::<SysPermissionVo>::from_vo(permissions);
             let token = Uuid::new().to_string();
             USER_LOGIN_CACHI.set_minute( token.as_str(), user.id, 60*24).await.ok();
-
+            SysLogService::add_login_log(user.user_name.clone(), req.remote_addr().to_string()).await;
             Ok(WebResult::success(LoginResultVo{
                 token,
                 user,
@@ -162,7 +164,7 @@ impl LoginService {
             let permissions = Vec::<SysPermissionVo>::from_vo(permissions);
             let token = Uuid::new().to_string();
             USER_LOGIN_CACHI.set_minute( token.as_str(), user.id, 60*24).await.ok();
-
+            SysLogService::add_login_log(user.user_name.clone(), req.remote_addr().to_string()).await;
             Ok(WebResult::success(LoginResultVo{
                 token,
                 user,
