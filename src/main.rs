@@ -10,6 +10,8 @@ use rbatis::RBatis;
 use rbdc_mysql::MysqlDriver;
 use salvo::cors::{Any, Cors};
 use salvo::prelude::*;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 mod model;
 mod auth;
@@ -36,13 +38,10 @@ lazy_static! {
     static ref SMS_SERVER:SmsServer= SmsServer::new();
 }
 
-
 #[tokio::main]
 async fn main() {
-    // 初始化日志
-    tracing_subscriber::fmt()
-        .with_thread_ids(true)
-        .init();
+
+    utils::log::log_init();
     // 定时任务初始化
     init_scheduler().await;
     // 设置端口
