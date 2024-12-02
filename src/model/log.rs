@@ -33,12 +33,12 @@ impl_select_page!( SysLog{select_page(item:SysLogPageReq) =>"
       where 1=1
      if item.user_name != null && item.user_name != '':
        ` and user_name like CONCAT('%', #{item.user_name}, '%') `
-     if item.log_type != null && item.log_type != '':
+     if item.log_type != null:
        ` and log_type = #{item.log_type}`
-      if item.start_time != null && item.start_time != '':
-       ` and create_time >= #{item.start_time}`
-      if item.end_time != null && item.end_time != '':
-       ` and create_time <= #{item.end_time}`
+     if item.start_time != null:
+        ` and create_time >= #{item.start_time}`
+     if item.end_time != null:
+        ` and create_time <= #{item.end_time}`
      "
 
 
