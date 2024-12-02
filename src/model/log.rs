@@ -4,6 +4,7 @@ use rbatis::rbdc::DateTime;
 use rbatis::{crud, impl_select_page, sql, RBatis};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
+
 #[derive(Deserialize, Serialize, Debug, Clone,Default)]
 pub struct SysLog {
     pub id: u64,
@@ -74,10 +75,13 @@ pub struct SysLogVo {
     pub create_time: DateTime,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+use validator::Validate;
+
+#[derive(Deserialize, Serialize, Validate, Debug, Clone)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct SysLogPageReq {
     pub user_name: Option<String>,
+    #[validate(range(min = 1, max = 4, message = "日志类型只能是1-4"))]
     pub log_type: Option<i32>,
     pub start_time: Option<DateTime>,
     pub end_time: Option<DateTime>,

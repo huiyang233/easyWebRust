@@ -16,6 +16,9 @@ tracing-appender="0.2.3"
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.132"
 serde_yaml = "0.9.33"
+# 验证器
+validator = {version = "0.19.0",features = ["derive"]}
+
 
 # 全局变量
 lazy_static = "1.4.0"

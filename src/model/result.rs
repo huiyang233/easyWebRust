@@ -101,6 +101,7 @@ impl <T> WebResult<T> {
     }
 }
 
+
 #[derive(Debug, Serialize)]
 pub struct ResultError {
     pub code: i32,
@@ -165,6 +166,9 @@ impl ResultError{
     pub fn not_permission() -> ResultError{
         ResultError::new(40000,"没有权限".to_string())
     }
+    pub fn parameter_error(str:String) -> ResultError{
+        ResultError::new(40001,str)
+    }
 
 }
 
@@ -178,7 +182,7 @@ impl From<rbatis::rbdc::Error> for ResultError {
 impl From<ParseError> for ResultError{
     fn from(err: ParseError) -> Self {
         error!("ParseError error:{}",err);
-        ResultError::param_error(err.to_string())
+        ResultError::param_error("解析参数失败".to_string())
     }
 }
 
