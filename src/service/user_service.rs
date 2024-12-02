@@ -167,8 +167,8 @@ impl UserService{
         database_user.update_by = current.user_name.clone();
         database_user.update_time = DateTime::now();
         let mut tx = DB::get_transaction().await;
+        SysRole::delete_role_by_user_id(&mut tx,&database_user.id).await?;
         if !role_ids.is_empty() {
-            SysRole::delete_role_by_user_id(&mut tx,&database_user.id).await?;
             SysRole::insert_list(&mut tx, &role_ids,&database_user.id).await?;
 
         }

@@ -120,9 +120,16 @@
           }">
             <n-input v-model:value="modal.form.phoneNumber" />
           </n-form-item>
+
+
           <n-form-item label="角色" path="roleIds">
-            <n-select v-model:value="modal.form.roleIds" :options="roles" label-field="name" value-field="id" clearable
-                      filterable multiple />
+            <n-transfer :source-filterable="true" v-model:value="modal.form.roleIds" :options="roles" />
+
+
+            <!-- <n-select v-model:value="modal.form.roleIds" :options="roles" label-field="name" value-field="id" clearable
+                      filterable multiple /> -->
+
+
           </n-form-item>
         </n-form>
         <template #footer>
@@ -166,7 +173,7 @@ const modal = ref({
   loading:false
 })
 
-api.getAllRoles().then(({ data = [] }) => (roles.value = data))
+api.getAllRoles().then(({ data = [] }) => (roles.value = data.map(res=> ({label:res.name,value:res.id}))))
 
 function handleSearch() {
   pagination.page = 1
@@ -178,6 +185,7 @@ function handleEdit(row){
   modal.value.form = { ...row }
   modal.value.form.roleIds =  modal.value.form.roles.map(res=> res.id)
   modal.value.show = true
+  console.log(modal.value.form.roleIds)
   modal.value.title="编辑用户"
 }
 

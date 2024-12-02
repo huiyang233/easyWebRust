@@ -14,6 +14,6 @@ export default {
   update: (data) => request.patch(`/user/${data.id}`, data),
   delete: (id) => request.delete(`/user/${id}`),
   resetPwd: (id, data) => request.put(`/user/${id}`, data),
-
+  readOne: (id) => request.get(`/user/${id}`),
   getAllRoles: () => request.get('/role/all'),
 }

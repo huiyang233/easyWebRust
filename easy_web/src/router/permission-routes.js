@@ -38,11 +38,7 @@ export const permissionRoutes = [
           icon: 'i-fe:user',
           show: true,
           keepAlive: null,
-          btns: [{
-            code: 'AddUser',
-            name: '创建新用户'
-          }]
-        }
+        },
       },
       {
         name: 'RoleManagement',
