@@ -7,7 +7,8 @@ export const permissionRoutes = [
       title: '首页',
       show: true,
       icon: 'i-fe:home'
-    }
+    },
+    keepAlive: true,
   },
   {
     name: 'userInfo',

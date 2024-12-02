@@ -97,12 +97,13 @@ const initCaptcha = throttle(async() => {
   const {flag,data} = await api.getLoginCountData()
   console.log(flag,data)
   if (!flag){
-    $message.error('验证码获取失败', { key: 'getLoginCountData' })
+    $message.error('获取用户登录数图标', { key: 'getLoginCountData' })
     return
   }
   trendOption.value.xAxis[0].data = data.map(item => item.login_date)
   trendOption.value.series[0].data = data.map(item => item.login_count)
   console.log(trendOption.value)
+  await api.getUserCount()
 
 }, 500)
 

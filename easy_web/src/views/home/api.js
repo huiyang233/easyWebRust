@@ -1,5 +1,6 @@
 import {request} from '@/utils'
 
 export default {
-    getLoginCountData: () => request.get('/report'),
+    getLoginCountData: () => request.get('/report/select_login_count_by_seven_day'),
+    getUserCount: () => request.get('/report/select_user_count'),
 }

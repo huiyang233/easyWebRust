@@ -30,7 +30,7 @@ impl SysLog {
 
 crud!(SysLog{});
 impl_select_page!( SysLog{select_page(item:SysLogPageReq) =>"
-      where 1=1
+     where 1=1
      if item.user_name != null && item.user_name != '':
        ` and user_name like CONCAT('%', #{item.user_name}, '%') `
      if item.log_type != null:

@@ -1,4 +1,5 @@
 use crate::model::result::{Http, WebResult};
+use crate::model::user::SysUser;
 use crate::RB;
 use rbatis::RBatis;
 use rbs::Value;
@@ -9,11 +10,17 @@ pub struct SysReport;
 impl SysReport {
     // 查询七天内用户登录统计
     pub async fn select_login_count_by_seven_day() -> Http<Value> {
-        let id = SysReport::select_login_count_by_seven_day_(RB.deref()).await?;
+        let id = SysReport::_select_login_count_by_seven_day(RB.deref()).await?;
         Ok(WebResult::success(id))
     }
 
-    pub async fn select_login_count_by_seven_day_(rb: &RBatis) -> rbatis::Result<Value> {
+    // 当前用户数量
+    pub async fn select_user_count() -> Http<i64> {
+        let id = SysUser::get_count(RB.deref()).await?;
+        Ok(WebResult::success(id))
+    }
+
+    async fn _select_login_count_by_seven_day(rb: &RBatis) -> rbatis::Result<Value> {
 
         {} use rbatis::executor::Executor;
         let r = rb.query(&"WITH date_series AS (

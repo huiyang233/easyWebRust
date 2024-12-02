@@ -42,6 +42,11 @@ impl SysUser {
     pub async fn change_password(rb: &RBatis,password:&str ,user_id: &u64) -> rbatis::Result<ExecResult> {
         impled!()
     }
+
+    #[sql("select count(*) from sys_user where is_del = false ")]
+    pub async fn get_count(rb: &RBatis) -> rbatis::Result<i64> {
+        impled!()
+    }
 }
 crud!(SysUser{});
 impl_select!(SysUser{select_by_user_name(user_name:&str) -> Option => "`where is_del=false and user_name = #{user_name} limit 1`"});
