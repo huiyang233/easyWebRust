@@ -18,7 +18,9 @@ pub fn init_sys_log_router() -> Router{
         Router::with_path("report")
             .hoop(auth_check)
             .push(Router::new().path("select_login_count_by_seven_day").get(select_login_count_by_seven_day))
+            .push(Router::new().path("select_login_count_by_today").get(select_login_count_by_today))
             .push(Router::new().path("select_user_count").get(select_user_count)),
+
 
     )
 }
@@ -38,6 +40,13 @@ pub async fn select_login_count_by_seven_day(req: &mut Request,depot: &mut Depot
 pub async fn select_user_count(req: &mut Request,depot: &mut Depot) ->Http<i64>{
     SysReport::select_user_count().await
 }
+
+#[handler]
+pub async fn select_login_count_by_today(req: &mut Request,depot: &mut Depot) ->Http<i64>{
+    SysReport::select_login_count_by_today().await
+}
+
+
 
 
 

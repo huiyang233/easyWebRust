@@ -30,12 +30,17 @@ pub async fn auth_check(req: &mut Request, depot: &mut Depot, _res: &mut Respons
         return Err(ResultError::token_error())
     };
     let user_id = USER_LOGIN_CACHI.get(token.as_str()).await;
+    let x = req.headers_mut();
+
     let user_id = match user_id {
         None => {
             ctrl.skip_rest();
             return Err(ResultError::token_error())
         }
-        Some(data) => {data}
+        Some(data) => {
+            x.insert("user_id", data.to_string().parse().unwrap());
+            data
+        }
     };
     // 查数据库
     let user_info = UserService::get_user_by_id(user_id).await;
