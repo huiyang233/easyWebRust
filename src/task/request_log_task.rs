@@ -11,14 +11,14 @@ pub struct RequestLogTask{
 }
 
 impl RequestLogTask{
-    pub async fn send_sms(&self,message: RequestLog){
+    pub async fn send(&self,message: RequestLog){
         self.tx.send(message).await.unwrap();
     }
 
     pub fn new()->RequestLogTask{
         let (tx, mut rx) =  mpsc::channel::<RequestLog>(100);
-        let mut buffer: Vec<RequestLog> = Vec::with_capacity(100);
-        info!("请求日志模块初始化成功");
+        let mut buffer: Vec<RequestLog> = Vec::new();
+        info!("保存请求日志任务启动");
         tokio::spawn(async move {
             loop {
                 let size = rx.recv_many(&mut buffer, 100).await;

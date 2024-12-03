@@ -48,9 +48,9 @@ pub async fn log(req: &mut Request, depot: &mut Depot, res: &mut Response, ctrl:
 
 
 
-    SMS_REQUEST_LOG_TASK.send_sms(RequestLog {
+    SMS_REQUEST_LOG_TASK.send(RequestLog {
         id: ID_WORKER.new_id(),
-        ip: req.remote_addr().to_string(),
+        ip: req.remote_addr().to_string().replace("socket://",""),
         uri: req.uri().to_string(),
         method: req.method().to_string(),
         duration: duration.as_millis() as u64,
