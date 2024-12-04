@@ -40,10 +40,8 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
-    let file_appender = tracing_appender::rolling::daily("./log", "app.log");
-    // _guard这玩意一定要全局存在，销毁后就不往文件里面写日志了。
-    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
-    utils::log::log_init(non_blocking);
+    // _guard必须贯穿整个主流程
+    let _guard = utils::log::init_log();
     // 定时任务初始化
     init_scheduler().await;
     // 设置端口
