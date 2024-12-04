@@ -3,7 +3,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 
 pub fn log_init(){
     // 初始化日志
-    let timer = tracing_subscriber::fmt::time::ChronoLocal::new("%Y-%m-%d %H:%M:%S %:z".into()); // 自定义格式
+    let timer = tracing_subscriber::fmt::time::ChronoLocal::new("%F %H:%M:%S%.6f".into()); // 自定义格式
     let file_appender = tracing_appender::rolling::daily("./log", "app.log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
     tracing_subscriber::registry()
