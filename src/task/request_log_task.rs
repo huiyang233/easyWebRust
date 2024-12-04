@@ -22,7 +22,6 @@ impl RequestLogTask{
         tokio::spawn(async move {
             loop {
                 let size = rx.recv_many(&mut buffer, 100).await;
-                info!("收到日志:{}",size);
                 if size > 0 {
                     RequestLog::insert_batch(RB.deref(), &buffer, buffer.len() as u64).await.ok();
                     buffer.clear();
