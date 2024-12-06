@@ -1,4 +1,4 @@
-create table if not exists agent_info
+create table  agent_info
 (
     id          bigint       not null
     primary key,

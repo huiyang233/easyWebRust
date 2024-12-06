@@ -1,4 +1,4 @@
-create table easy.sys_log
+create table sys_log
 (
     id          bigint       not null
         primary key,
@@ -11,11 +11,11 @@ create table easy.sys_log
 );
 
 create index sys_log_create_time_index
-    on easy.sys_log (create_time);
+    on sys_log (create_time);
 
 create index sys_log_log_type_index
-    on easy.sys_log (log_type);
+    on sys_log (log_type);
 
 create index sys_log_user_name_index
-    on easy.sys_log (user_name);
+    on sys_log (user_name);
 

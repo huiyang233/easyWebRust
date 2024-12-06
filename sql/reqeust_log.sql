@@ -1,4 +1,4 @@
-create table easy.request_log
+create table request_log
 (
     id          bigint       not null
         primary key,
@@ -13,5 +13,5 @@ create table easy.request_log
 );
 
 create index request_log_user_id_index
-    on easy.request_log (user_id);
+    on request_log (user_id);
 

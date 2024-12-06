@@ -20,3 +20,4 @@ INSERT INTO sys_permission (id, create_by, create_time, update_by, update_time, 
 INSERT INTO sys_permission (id, create_by, create_time, update_by, update_time, name, value, p_id) VALUES (7, 'system', '2024-01-26 09:35:26.000000', 'system', '2024-01-26 09:35:23.000000', '删除角色', 'role:del', 5);
 INSERT INTO sys_permission (id, create_by, create_time, update_by, update_time, name, value, p_id) VALUES (8, 'system', '2024-01-26 09:35:26.000000', 'system', '2024-01-26 09:35:23.000000', '更新角色', 'role:update', 5);
 INSERT INTO sys_permission (id, create_by, create_time, update_by, update_time, name, value, p_id) VALUES (9, 'system', '2024-01-26 09:35:26.000000', 'system', '2024-01-26 09:35:23.000000', '权限', 'permission', 0);
+INSERT INTO sys_permission (id, create_by, create_time, update_by, update_time, name, value, p_id) VALUES (10, 'system', '2024-01-26 09:35:26.000000', 'system', '2024-01-26 09:35:23.000000', '日志', 'log', 0);
