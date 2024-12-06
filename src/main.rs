@@ -58,8 +58,6 @@ async fn main() {
     // 初始化服务
     let service = Service::new(router).hoop(log).hoop(cors_handler);
 
-
-
     //// 证书
     // let cert = include_bytes!("../certs/cert.pem").to_vec();
     // let key = include_bytes!("../certs/key.pem").to_vec();
