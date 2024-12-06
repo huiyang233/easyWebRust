@@ -1,5 +1,6 @@
 use crate::api::init_router;
 use crate::config::config::load_config;
+use crate::middleware::blacklist::BlackList;
 use crate::middleware::log::log;
 use crate::task::scheduler::init_scheduler;
 use crate::task::sms_task::SmsServer;
@@ -55,8 +56,11 @@ async fn main() {
         .allow_methods(Any)
         .allow_headers(Any)
         .into_handler();
+    // 黑名单拦截器  封60分钟
+    let black = BlackList::new(60, 60, 10);
     // 初始化服务
-    let service = Service::new(router).hoop(log).hoop(cors_handler);
+
+    let service = Service::new(router).hoop(log).hoop(black).hoop(cors_handler);
 
     //// 证书
     // let cert = include_bytes!("../certs/cert.pem").to_vec();

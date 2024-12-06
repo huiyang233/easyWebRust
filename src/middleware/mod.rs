@@ -1,3 +1,3 @@
 pub mod log;
-mod blacklist;
+pub mod blacklist;
 

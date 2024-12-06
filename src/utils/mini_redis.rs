@@ -87,11 +87,23 @@ impl<T:Serialize+ for<'de> Deserialize<'de>> MiniRedis<T>{
     }
 
     pub async fn set(&self,key:&str,value:T){
-        let data = Data{
-            data:serde_json::to_string(&value).unwrap(),
-            out_time:0,
-        };
-        MINI_REDIS_DATA.write().await.insert(format!("{}:{}",self.name.to_string() ,key),data);
+
+        let mut map = MINI_REDIS_DATA.write().await;
+        match map.get_mut(&format!("{}:{}",self.name.to_string() ,key)) {
+            None => {
+                let data = Data{
+                    data:serde_json::to_string(&value).unwrap(),
+                    out_time:0,
+                };
+                MINI_REDIS_DATA.write().await.insert(format!("{}:{}",self.name.to_string() ,key),data);
+            }
+            Some(data) => {
+                data.data = serde_json::to_string(&value).unwrap();
+
+            }
+        }
+
+
     }
 
     pub async fn set_millis(&self,key:&str,value:T,out_time:u64){
@@ -114,6 +126,24 @@ impl<T:Serialize+ for<'de> Deserialize<'de>> MiniRedis<T>{
             Some(data) => {
                 if data.out_time!=0 {
                     data.out_time = (chrono::Local::now().timestamp_millis() as u64) + out_time;
+                }
+            }
+        }
+    }
+
+    // 获取剩余时间
+    pub async fn get_expire(&self, key: &str) -> Option<u64> {
+        let map = MINI_REDIS_DATA.read().await;
+        match map.get(&format!("{}:{}",self.name.to_string() ,key)) {
+            None => {
+                None
+            }
+            Some(data) => {
+                if data.out_time!=0 {
+                    let time = data.out_time - chrono::Local::now().timestamp_millis() as u64;
+                    Some(time)
+                }else{
+                    Some(0)
                 }
             }
         }
