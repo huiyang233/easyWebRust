@@ -1,6 +1,6 @@
 ## 简介
 #### easyWebRust 是一个基于Rust开发的WEB脚手架，你可以基于这个项目继续开发你需要的内容。
-#### 后端部分基于[salvo开发](https://github.com/salvo-rs/salvo)，使用rbatis作为数据库连接，使用redis作为缓存。
+#### 后端部分基于[salvo](https://github.com/salvo-rs/salvo)开发，使用[rbatis](https://github.com/rbatis/rbatis)作为数据库连接，使用[redis-rs](https://github.com/redis-rs/redis-rs)作为缓存。
 #### 前端部分基于[Vue Naive Admin](https://github.com/zclzone/vue-naive-admin)开发;修改权限地方的部分代码。
 
 ## 项目结构
@@ -18,6 +18,12 @@
         - task 定时任务/队列任务
         - utils 工具包
 ## 如何启动
+
+#### 安装Rust
+[Rust官网](https://www.rust-lang.org/tools/install)
+[Rust官方文档](https://forge.rust-lang.org/infra/other-installation-methods.html)
+
+
 #### 后端
 1. 执行sql目录中的sql文件
 2. 修改config.toml配置文件
