@@ -38,7 +38,7 @@ deadpool-redis = "0.18.0"
 
 
 # 加密解密
-rust-crypto = {version = "0.2.36",features = ["with-bench"]}
+rust-crypto = {version = "0.2.36"}
 
 # 验证码的依赖
 base64 = "0.21.5"
