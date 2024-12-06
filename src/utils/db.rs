@@ -21,7 +21,7 @@ impl DB{
     pub async fn get_transaction() -> RBatisTxExecutorGuard {
         let tx = RB.deref().acquire_begin().await.unwrap();
         let mut tx = tx.defer_async(|mut tx| async move {
-            if !tx.done {
+            if !tx.done() {
                 let r = tx.rollback().await;
                 error!("回滚");
                 if let Err(e) = r {

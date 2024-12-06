@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 salvo = { version= "0.74.2",features=["cors","quinn"]  }
-tokio = { version = "1", features = ["macros"] }
+tokio = { version = "1.42.0", features = ["macros"] }
 
 # 日志
-tracing = "0.1"
+tracing = "0.1.41"
 tracing-subscriber={version = "0.3",features = ["env-filter"]}
 tracing-appender="0.2.3"
 
@@ -27,10 +27,10 @@ lazy_static = "1.4.0"
 chrono = "0.4.38"
 
 # 数据库操作
-rbs = { version = "4.5" }
-rbatis = { version = "4.5"}
+rbs = { version = "4.5.24" }
+rbatis = { version = "4.5.46"}
 # windows得用rust写的tls。用原生的会出问题
-rbdc-mysql = {version="4.5"}
+rbdc-mysql = {version="4.5.13"}
 
 #Redis
 redis = { version = "0.27.5", features = ["tokio-comp"] }
@@ -38,7 +38,7 @@ deadpool-redis = "0.18.0"
 
 
 # 加密解密
-rust-crypto = "0.2.36"
+rust-crypto = {version = "0.2.36",features = ["with-bench"]}
 
 # 验证码的依赖
 base64 = "0.21.5"
