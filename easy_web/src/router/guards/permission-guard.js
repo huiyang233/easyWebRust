@@ -6,20 +6,14 @@
  * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
  **********************************/
 
-import { useAuthStore } from '@/store'
-import api from '@/api'
+import {useAuthStore} from '@/store'
 
-const WHITE_LIST = ['/login', '/404','/frontEnd']
+const WHITE_LIST = ['/login', '/404']
 export function createPermissionGuard(router) {
   router.beforeEach(async (to) => {
     const authStore = useAuthStore()
     const token = authStore.accessToken
 
-    /** 没有token */
-    if (!token) {
-      if (WHITE_LIST.includes(to.path)) return true
-      return { path: 'frontEnd', query: { ...to.query, redirect: to.path } }
-    }
 
     // 有token的情况
     if (to.path === '/login') return { path: '/' }

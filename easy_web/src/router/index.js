@@ -6,10 +6,10 @@
  * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
  **********************************/
 
-import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
-import { setupRouterGuards } from './guards'
-import { useAuthStore, usePermissionStore, useUserStore } from '@/store'
-import { basicRoutes } from './basic-routes'
+import {createRouter, createWebHashHistory, createWebHistory} from 'vue-router'
+import {setupRouterGuards} from './guards'
+import {useAuthStore, usePermissionStore, useUserStore} from '@/store'
+import {basicRoutes} from './basic-routes'
 
 export const router = createRouter({
   history:
@@ -37,7 +37,7 @@ export async function initUserAndPermissions(data) {
 
   if (!authStore.accessToken) {
     const route = unref(router.currentRoute)
-    if (route.path !== '/login' && route.path !== '/frontEnd') {
+    if (route.path !== '/login') {
       router.replace({
         path: '/login',
         query: route.query,

@@ -56,9 +56,9 @@ impl Handler for BlackList {
                 info!("ip:{},number:{}", ip, number);
                 self.cache.set(ip.as_str(), number).await;
                 if number >= self.visit_count {
-                    self.black_list.set_second(ip.as_str(), "".to_string(), self.ban_time).await;
-                    self.cache.remove(ip.as_str())
                     // 黑名单拦截
+                    self.black_list.set_second(ip.as_str(), "".to_string(), self.ban_time).await;
+                    self.cache.remove(ip.as_str()).await;
                 }
             }
         }
