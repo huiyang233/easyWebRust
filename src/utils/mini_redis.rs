@@ -25,6 +25,7 @@ struct Data<T>{
     data:T,
     out_time:u64,
 }
+#[derive(Debug)]
 pub struct MiniRedis<T>{
     data: Arc<RwLock<HashMap<String,Data<T>>>>,
     name: String,
@@ -89,7 +90,7 @@ impl<T:Serialize+ for<'de> Deserialize<'de> + Send + Sync + 'static> MiniRedis<T
                     data:value,
                     out_time:0,
                 };
-                self.data.write().await.insert(format!("{}:{}",self.name.to_string() ,key),data);
+                map.insert(format!("{}:{}",self.name.to_string() ,key),data);
             }
             Some(data) => {
                 data.data = value;
@@ -141,6 +142,15 @@ impl<T:Serialize+ for<'de> Deserialize<'de> + Send + Sync + 'static> MiniRedis<T
                 }
             }
         }
+    }
+
+    pub async fn keys(&self)->Vec<String>{
+        let map = self.data.read().await;
+        let mut vec = vec![];
+        for (key, _) in map.iter() {
+            vec.push(key.clone());
+        }
+        vec
     }
     pub async fn get(&self, key: &str) -> Option<T> where
         T: Clone, {

@@ -6,3 +6,4 @@ pub mod agent_info;
 pub mod merchant_info;
 pub mod log;
 pub mod request_log;
+pub mod black_list;
