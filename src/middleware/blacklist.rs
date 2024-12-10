@@ -1,5 +1,5 @@
 use crate::model::black_list::{BlackList, BlackListConfig};
-use crate::model::result::ResultError;
+use crate::model::result::{ResultError, WebResult};
 use crate::task::black_list_task::BlackListInsertTask;
 use crate::utils::mini_redis::MiniRedis;
 use crate::{ID_WORKER, RB};
@@ -194,7 +194,7 @@ impl Handler for BlackListMid {
         if option.is_some() {
             ctrl.skip_rest();
             // let string = format!("访问太频繁，请稍后再试;{:?}ms 后才能访问", self.black_list.get_expire(ip.as_str()).await);
-            res.render(Json(ResultError::new(403, "访问太频繁，请稍后再试".to_string())));
+            res.render(Json(WebResult::error(403, "访问太频繁，请稍后再试")));
             return;
         }
 
