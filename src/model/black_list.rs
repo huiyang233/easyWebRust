@@ -1,8 +1,11 @@
 use crate::utils::serialize::deserialize_bool;
+use crate::utils::serialize::deserialize_date_option;
 use crate::utils::serialize::deserialize_id;
 use crate::utils::serialize::serialize_bool;
 use crate::utils::serialize::serialize_datetime;
 use crate::utils::serialize::serialize_id;
+use crate::utils::serialize::serialize_option_datetime;
+use rbatis::executor::Executor;
 use rbatis::rbdc::db::ExecResult;
 use rbatis::rbdc::DateTime;
 use rbatis::{crud, impl_insert, impl_select_page, sql, RBatis};
@@ -90,7 +93,27 @@ impl BlackList {
     pub async fn select_all(rb: &RBatis) -> rbatis::Result<Vec<BlackList>> {
         impled!()
     }
+
+    pub async fn insert_list(rb: &dyn Executor, list: &[BlackList]) -> rbatis::Result<ExecResult> {
+        let mut sql = String::with_capacity(1084usize);
+        let mut args = Vec::with_capacity(2usize);
+        sql.push_str("replace into black_list(id,ip,create_time,is_del,reason,ban_time) values");
+        for ref black in list {
+            args.push(rbs::to_value(&black.id ).unwrap_or_default());
+            args.push(rbs::to_value(&black.ip).unwrap_or_default());
+            args.push(rbs::to_value(&black.create_time).unwrap_or_default());
+            args.push(rbs::to_value(&black.is_del).unwrap_or_default());
+            args.push(rbs::to_value(&black.reason).unwrap_or_default());
+            args.push(rbs::to_value(&black.ban_time).unwrap_or_default());
+            sql.push_str("(?,?,?,?,?,?)");
+            sql.push_str(",");
+        }
+        sql = sql.trim_end_matches(",").to_string();
+        rb.exec(&sql, args).await
+    }
 }
+
+
 
 impl_insert!(BlackList{});
 impl_select_page!( BlackList{select_page(item:BlackListPageReq) =>"
@@ -107,6 +130,8 @@ pub struct BlackListEditDto {
     pub id: u64,
     pub ip: String,
     pub reason: String,
+    #[serde(deserialize_with = "deserialize_date_option")]
+    pub ban_time:Option<DateTime>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -115,6 +140,8 @@ pub struct BlackListEditDto {
 pub struct BlackListAddDto {
     pub ip: String,
     pub reason: String,
+    #[serde(deserialize_with = "deserialize_date_option")]
+    pub ban_time:Option<DateTime>,
 }
 
 impl From<BlackList> for BlackListVo {
@@ -123,8 +150,8 @@ impl From<BlackList> for BlackListVo {
             id: data.id,
             ip: data.ip,
             create_time: data.create_time,
-            is_del: data.is_del,
             reason: data.reason,
+            ban_time: data.ban_time,
         }
     }
 }
@@ -137,8 +164,9 @@ pub struct BlackListVo {
     pub ip: String,
     #[serde(serialize_with = "serialize_datetime")]
     pub create_time: DateTime,
-    pub is_del: bool,
     pub reason: String,
+    #[serde(serialize_with = "serialize_option_datetime")]
+    pub ban_time:Option<DateTime>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

@@ -20,7 +20,7 @@
           </div>
         </n-form>
       </AppCard>
-      <x-n-data-table :loading="loading" :pagination="pagination" :data="tableData" :scroll-x="800"  @update:page="onPageChange">
+      <x-n-data-table :remote="true" :loading="loading" :pagination="pagination" :data="tableData" :scroll-x="800"  @update:page="onPageChange">
           <x-n-data-table-column width="100"  key="name" title="权限名" >
           </x-n-data-table-column>
           <x-n-data-table-column width="100" key="value" title="权限值" >
@@ -31,11 +31,11 @@
   </template>
   
   <script setup>
-  import { NButton, NSwitch, NTag } from 'naive-ui'
+  import {NButton} from 'naive-ui'
   import api from './api'
-  import { XNDataTable, XNDataTableColumn } from '@skit/x.naive-ui'
-  import { AppCard, CommonPage, MeQueryItem } from '@/components/index.js'
-  
+  import {XNDataTable, XNDataTableColumn} from '@skit/x.naive-ui'
+  import {AppCard, CommonPage, MeQueryItem} from '@/components/index.js'
+
   defineOptions({ name: 'SysPermission' })
   
   const tableData = ref([])

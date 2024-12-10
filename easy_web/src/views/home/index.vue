@@ -43,7 +43,7 @@
               <template #prefix>
                 <i class="i-fe:user"/>
               </template>
-              {{ todayLoginUserCount }}
+              {{ todayActiveUsersCount }}
             </n-statistic>
           </n-col>
         </n-row>
@@ -124,6 +124,7 @@ const trendOption = ref({
 
 const todayLoginUserCount = ref(0)
 const sysUserCount = ref(0)
+const todayActiveUsersCount = ref(0)
 
 
 const initCaptcha = throttle(async () => {
@@ -140,7 +141,8 @@ const initCaptcha = throttle(async () => {
   sysUserCount.value = res2.data
   const res = await api.getTodayLoginCount()
   todayLoginUserCount.value = res.data
-
+  const res3 = await api.getTodayActiveUsersCount()
+  todayActiveUsersCount.value = res3.data
 
 }, 500)
 

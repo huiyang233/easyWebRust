@@ -30,7 +30,7 @@ impl BlackListInsertTask {
             loop {
                 let size = rx.recv_many(&mut buffer, 100).await;
                 if size > 0 {
-                    BlackList::insert_batch(RB.deref(), &buffer, buffer.len() as u64).await.ok();
+                    BlackList::insert_list(RB.deref(),&buffer).await.ok();
                     buffer.clear();
                 }
             }

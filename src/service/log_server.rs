@@ -65,7 +65,7 @@ impl SysLogService {
     }
 
     pub async fn add_login_log(user_name: String, ip: String){
-        SysLogService::add_sys_log("用户登录".to_string(), LOG_TYPE_LOGIN, "登录成功".to_string(), user_name, ip).await.ok();
+        SysLogService::add_sys_log("用户登录".to_string(), LOG_TYPE_LOGIN, "登录成功".to_string(), user_name, ip.replace("socket://","")).await.ok();
     }
     pub async fn add_sys_log(name: String, log_type: i32, desc: String, user_name: String, ip: String) -> Result<(), ResultError> {
         let mut database_data = SysLog::default();

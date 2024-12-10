@@ -58,8 +58,8 @@ async fn main() {
         .into_handler();
     // 黑名单拦截器  封60分钟
     let black = BlackListMid::new(60, 60, 1000);
-    // 初始化服务
 
+    // 初始化服务
     let service = Service::new(router).hoop(log).hoop(black).hoop(cors_handler);
 
     //// 证书

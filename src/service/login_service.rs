@@ -164,7 +164,10 @@ impl LoginService {
             let permissions = Vec::<SysPermissionVo>::from_vo(permissions);
             let token = Uuid::new().to_string();
             USER_LOGIN_CACHI.set_minute( token.as_str(), user.id, 60*24).await.ok();
-            SysLogService::add_login_log(user.user_name.clone(), req.remote_addr().to_string()).await;
+            SysLogService::add_login_log(
+                user.user_name.clone(),
+                req.remote_addr().to_string()
+            ).await;
             Ok(WebResult::success(LoginResultVo{
                 token,
                 user,

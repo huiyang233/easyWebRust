@@ -25,27 +25,12 @@ pub async fn log(req: &mut Request, depot: &mut Depot, res: &mut Response, ctrl:
 
     // info!("之前req:{:?}",req);
     // info!("之后res:{:?}",res.body);
-    let user_id = req.headers_mut().get("user_id");
-    let user_id =  match user_id {
-        None => {0u64}
-        Some(user_id) => {
+    let user_id = req.headers_mut().get("user_id").map(|user_id|{
             let x = user_id.to_str().unwrap_or_default();
             let user_id_u64: u64 = x.parse().unwrap_or_else(|_| 0u64);
             user_id_u64
         }
-    };
-    // let res_body = match &res.body {
-    //     ResBody::None => {String::new()}
-    //     ResBody::Once(data) => {String::from_utf8(data.to_vec()).unwrap()}
-    //     ResBody::Chunks(_) => {"Chunks".to_string()}
-    //     ResBody::Hyper(_) => {"Hyper".to_string()}
-    //     ResBody::Boxed(_) => {"Boxed".to_string()}
-    //     ResBody::Stream(_) => {"Stream".to_string() }
-    //     ResBody::Channel(_) => {String::new()}
-    //     ResBody::Error(_) => {String::new()}
-    //     _ => {"".to_string()}
-    // };
-
+    );
 
 
     SMS_REQUEST_LOG_TASK.send(RequestLog {
@@ -54,7 +39,7 @@ pub async fn log(req: &mut Request, depot: &mut Depot, res: &mut Response, ctrl:
         uri: req.uri().to_string(),
         method: req.method().to_string(),
         duration: duration.as_millis() as u64,
-        user_id:  Some(user_id),
+        user_id,
         headers: Some(format!("{:?}",req.headers())),
         query: Some(format!("{:?}",req.queries())),
         create_time: Some(DateTime::now()),

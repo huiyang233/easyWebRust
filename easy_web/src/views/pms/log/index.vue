@@ -33,7 +33,7 @@
           </div>
         </n-form>
       </AppCard>
-      <x-n-data-table :loading="loading" :pagination="pagination" :data="tableData" :scroll-x="800"  @update:page="onPageChange">
+      <x-n-data-table :loading="loading" :pagination="pagination" :remote="true"  :data="tableData" :scroll-x="800"  @update:page="onPageChange">
          
           <x-n-data-table-column width="150"   key="name" title="事件名" >
           </x-n-data-table-column>
@@ -60,11 +60,11 @@
   </template>
   
   <script setup>
-  import { NButton} from 'naive-ui'
+  import {NButton} from 'naive-ui'
   import api from './api'
-  import { XNDataTable, XNDataTableColumn } from '@skit/x.naive-ui'
-  import { AppCard, CommonPage, MeQueryItem } from '@/components/index.js'
-  
+  import {XNDataTable, XNDataTableColumn} from '@skit/x.naive-ui'
+  import {AppCard, CommonPage, MeQueryItem} from '@/components/index.js'
+
   defineOptions({ name: 'SysLog' })
 
   const selectOptions = [
@@ -141,9 +141,10 @@
       })
       queryItems.value.startTime=undefined
       queryItems.value.endTime=undefined
-       queryItems.value.time=time
+      queryItems.value.time=time
       tableData.value = data?.pageData || data
       pagination.itemCount = data.total ?? data.length
+      console.log(pagination)
     } catch (error) {
       tableData.value = []
       pagination.itemCount = 0

@@ -30,7 +30,7 @@
         </div>
       </n-form>
     </AppCard>
-    <x-n-data-table :loading="loading" :pagination="pagination" :data="tableData" :scroll-x="800"  @update:page="onPageChange">
+    <x-n-data-table :remote="true" :loading="loading" :pagination="pagination" :data="tableData" :scroll-x="800"  @update:page="onPageChange">
       <x-n-data-table-column width="150" fixed="left"  key="userName" title="用户名" />
       <x-n-data-table-column width="150" key="name" title="姓名" />
       <x-n-data-table-column width="150" key="phoneNumber" title="手机号" />
@@ -148,10 +148,10 @@
 </template>
 
 <script setup>
-import { NButton, NSwitch, NTag } from 'naive-ui'
+import {NButton, NSwitch, NTag} from 'naive-ui'
 import api from './api'
-import { XNDataTable, XNDataTableColumn } from '@skit/x.naive-ui'
-import { AppCard, CommonPage, MeQueryItem } from '@/components/index.js'
+import {XNDataTable, XNDataTableColumn} from '@skit/x.naive-ui'
+import {AppCard, CommonPage, MeQueryItem} from '@/components/index.js'
 import {usePermissionStore} from '@/store'
 
 defineOptions({ name: 'UserMgt' })

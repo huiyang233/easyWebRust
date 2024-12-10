@@ -26,6 +26,17 @@ impl SysReport {
     }
 
 
+    pub async fn select_active_users() -> Http<i64> {
+        let id = SysReport::_select_active_users(RB.deref()).await?;
+        Ok(WebResult::success(id))
+    }
+    async fn _select_active_users(rb: &RBatis) -> rbatis::Result<i64> {
+        let r = rb.query_decode::<i64>(&"SELECT COUNT(distinct user_id) FROM request_log WHERE DATE(create_time) = CURDATE() and user_id is not null;", Vec::new()).await?;
+        Ok(r)
+    }
+
+
+
     async fn _select_login_count_by_today(rb: &RBatis) -> rbatis::Result<i64> {
         let r = rb.query_decode::<i64>(&"SELECT COUNT(*) FROM sys_log WHERE DATE(create_time) = CURDATE()", Vec::new()).await?;
         Ok(r)

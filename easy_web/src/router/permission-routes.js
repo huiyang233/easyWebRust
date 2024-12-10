@@ -82,6 +82,18 @@ export const permissionRoutes = [
           show: true,
           keepAlive: null,
         }
+      },
+      {
+        name: 'BlackListManagement',
+        path: '/systemManagement/blackListManagement',
+        permission: ['log'],
+        component: () => import('@/views/pms/black-list/index.vue'),
+        meta: {
+          title: '黑名单管理',
+          icon: 'i-fe:book',
+          show: true,
+          keepAlive: null,
+        }
 
       }
     ]

@@ -6,3 +6,4 @@ pub mod agent_info_service;
 pub mod merchant_info_service;
 pub mod log_server;
 pub mod report_service;
+pub mod black_list_service;
