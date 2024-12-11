@@ -1,10 +1,17 @@
 <template>
   <CommonPage>
     <template #action>
-      <n-button  v-permission="['black_list:add']"  type="primary" @click="handleAdd()">
-        <i class="i-material-symbols:add mr-4 text-18" />
-        创建
-      </n-button>
+      <div class="flex-row">
+        <n-button class="mr-10"  v-permission="['black_list:add']"  type="primary" @click="handleAdd()">
+          <i class="i-material-symbols:add mr-4 text-18" />
+          创建
+        </n-button>
+
+        <n-button  v-permission="['black_list:add']"  type="primary" @click="handleAdd()">
+          <i class="i-material-symbols:edit-outline mr-4 text-18" />
+          配置黑名单参数
+        </n-button>
+      </div>
     </template>
     <AppCard bordered bg="#fafafc dark:black" class="mb-30 min-h-60 rounded-4">
       <n-form class="flex justify-between p-16" @submit.prevent="handleSearch()">
@@ -90,7 +97,7 @@
           message: '请输入说明',
           trigger: ['input', 'blur'],
           }">
-            <n-input v-model:value="modal.form.reason" />
+            <n-input maxlength="100" show-count type="textarea" v-model:value="modal.form.reason" />
           </n-form-item>
         </n-form>
         <template #footer>
@@ -129,6 +136,14 @@ const modal = ref({
   type:2,
   loading:false
 })
+
+const configModal = ref({
+  show:false,
+  form:{},
+  title:"",
+  loading:false
+})
+
 
 
 function handleSearch() {

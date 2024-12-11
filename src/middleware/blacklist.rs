@@ -11,23 +11,33 @@ use salvo::{async_trait, Depot, FlowCtrl, Handler, Request, Response};
 use std::ops::{Add, Deref};
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::{Mutex, RwLock};
+use tokio::task::JoinHandle;
 use tracing::{error, info};
+
+#[derive(Debug)]
+struct Config{
+    pub ban_time: u64,
+    pub interval: u64,
+    pub visit_count: u64,
+}
+
 
 lazy_static! {
     static ref BLACK_LIST_TASK:BlackListInsertTask= BlackListInsertTask::new();
     static ref BLACK_LIST:MiniRedis<String> = MiniRedis::new("blackList");
+    static ref BLACK_LIST_CONFGI: Arc<RwLock<Config>> = Arc::new(RwLock::new(Config {
+        ban_time: 0,
+        interval: 60,
+        visit_count: 1000,
+    }));
 }
 
 pub struct BlackListMid{
     // 存的是ip
     pub cache: MiniRedis<u64>,
+    pub sync_interval: u64,
     // 禁封时间 0=永久 >0=xx秒
-    pub ban_time: u64,
-    // 秒，间隔
-    pub interval: u64,
-    // 每访问的次数
-    pub visit_count: u64,
-    pub sync_interval:u64,
 }
 ///
 ///
@@ -36,16 +46,38 @@ pub struct BlackListMid{
 ///
 ///
 impl BlackListMid {
-    pub fn new(ban_time: u64, interval: u64, visit_count: u64) -> Self {
+    pub fn new(sync_interval:u64) -> Self {
         let mut list = Self {
             cache: MiniRedis::new("cache"),
-            ban_time,
-            interval,
-            visit_count,
-            sync_interval: 60,
+            sync_interval,
         };
         BlackListMid::sync_black_list(list.sync_interval);
+        BlackListMid::sync_black_list_config(list.sync_interval);
         list
+    }
+    fn sync_black_list_config(sync_interval:u64) {
+        tokio::spawn(async move {
+            loop {
+                let result = BlackListConfig::select_by_id(RB.deref(), &1).await;
+                match result {
+                    Ok(x) => {
+                        if let Some(config) = x {
+                            let mut config_lock = BLACK_LIST_CONFGI.write().await;
+                            *config_lock = Config {
+                                ban_time: config.ban_time,
+                                interval: config.interval,
+                                visit_count: config.visit_count
+                            };
+                            info!("黑名单配置更新:{:?}", config_lock);
+                        }
+                    }
+                    Err(e) => {
+                        error!("获取黑名单配置失败: {}", e);
+                    }
+                }
+                tokio::time::sleep(Duration::from_secs(sync_interval)).await;
+            }
+        });
     }
     fn sync_black_list(sync_interval:u64){
        tokio::spawn(async move {
@@ -197,20 +229,21 @@ impl Handler for BlackListMid {
             res.render(Json(WebResult::error(403, "访问太频繁，请稍后再试")));
             return;
         }
-
+        let config = BLACK_LIST_CONFGI.read().await;
+        info!("config:{:?}",config);
         let x = self.cache.get(ip.as_str()).await;
         match x {
             None => {
-                self.cache.set_second(ip.as_str(), 1, self.interval).await;
+                self.cache.set_second(ip.as_str(), 1, config.interval).await;
             }
             Some(mut number) => {
                 number = number + 1;
                 info!("ip:{},number:{}", ip, number);
                 self.cache.set(ip.as_str(), number).await;
-                if number >= self.visit_count {
+                if number >= config.visit_count {
                     // 黑名单拦截
                     self.cache.remove(ip.as_str()).await;
-                    BlackListMid::add_black_list(ip,self.ban_time,"自动".to_string()).await;
+                    BlackListMid::add_black_list(ip,config.ban_time,"自动".to_string()).await;
                 }
             }
         }

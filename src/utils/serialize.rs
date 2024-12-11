@@ -124,16 +124,9 @@ pub fn deserialize_date<'de, D>(deserializer: D) -> Result<DateTime, D::Error>
     }
 }
 
+
 pub fn deserialize_date_option<'de, D>(deserializer: D) -> Result<Option<DateTime>, D::Error>
     where D: Deserializer<'de>, {
-    let date = String::deserialize(deserializer)?;
-    let result = DateTime::parse(FORMAT, date.as_str());
-    match result {
-        Ok(date) => {
-            Ok(Some(date))
-        }
-        Err(_) => {
-            Err(Error::custom("解析字段失败"))
-        }
-    }
+    Option::<DateTime>::deserialize(deserializer)
+
 }

@@ -56,8 +56,7 @@ async fn main() {
         .allow_methods(Any)
         .allow_headers(Any)
         .into_handler();
-    // 黑名单拦截器  封60分钟
-    let black = BlackListMid::new(60, 60, 1000);
+    let black = BlackListMid::new(10);
 
     // 初始化服务
     let service = Service::new(router).hoop(log).hoop(black).hoop(cors_handler);
