@@ -154,7 +154,7 @@ import {XNDataTable, XNDataTableColumn} from '@skit/x.naive-ui'
 import {AppCard, CommonPage, MeQueryItem} from '@/components/index.js'
 import {usePermissionStore} from '@/store'
 
-defineOptions({ name: 'UserMgt' })
+defineOptions({ name: 'UserManagement' })
 
 const usePermission = usePermissionStore()
 
@@ -173,7 +173,11 @@ const modal = ref({
   loading:false
 })
 
-api.getAllRoles().then(({ data = [] }) => (roles.value = data.map(res=> ({label:res.name,value:res.id}))))
+onMounted(()=>{
+  api.getAllRoles().then(({ data = [] }) => (roles.value = data.map(res=> ({label:res.name,value:res.id}))))
+});
+
+
 
 function handleSearch() {
   pagination.page = 1

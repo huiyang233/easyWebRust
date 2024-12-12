@@ -8,7 +8,7 @@ use crate::utils::serialize::serialize_option_datetime;
 use rbatis::executor::Executor;
 use rbatis::rbdc::db::ExecResult;
 use rbatis::rbdc::DateTime;
-use rbatis::{crud, impl_insert, impl_select_page, sql, RBatis};
+use rbatis::{impl_insert, impl_select_page, sql, RBatis};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[derive(Deserialize, Serialize, Debug, Clone,Default)]
@@ -25,17 +25,19 @@ impl BlackListConfig {
     pub async fn select_by_id(rb: &RBatis,id: &u64) -> rbatis::Result<Option<BlackListConfig>> {
         impled!()
     }
+    #[sql("update black_list_config set ban_time=?,`interval`=?,visit_count=? where id = ?")]
+    pub async fn update_by_id(rb: &RBatis,ban_time: &u64, interval: &u64, visit_count: &u64, id: &u64) -> rbatis::Result<ExecResult> {
+        impled!()
+    }
 
 }
 
-crud!(BlackListConfig{});
+// crud!(BlackListConfig{});
 
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct BlackListConfigEditDto {
-    #[serde(deserialize_with = "deserialize_id")]
-    pub id: u64,
     pub ban_time: u64,
     pub interval: u64,
     pub visit_count: u64,
@@ -46,7 +48,6 @@ pub struct BlackListConfigEditDto {
 impl From<BlackListConfig> for BlackListConfigVo {
     fn from(data: BlackListConfig) -> Self {
         Self {
-            id: data.id,
             ban_time: data.ban_time,
             interval: data.interval,
             visit_count: data.visit_count,
@@ -57,8 +58,6 @@ impl From<BlackListConfig> for BlackListConfigVo {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all(serialize = "camelCase"))]
 pub struct BlackListConfigVo {
-    #[serde(serialize_with = "serialize_id")]
-    pub id: u64,
     pub ban_time: u64,
     pub interval: u64,
     pub visit_count: u64,

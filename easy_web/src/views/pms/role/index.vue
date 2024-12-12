@@ -110,7 +110,7 @@ import {CommonPage} from '@/components/index.js'
 import {XNDataTable, XNDataTableColumn} from '@skit/x.naive-ui'
 import {usePermissionStore} from '@/store'
 
-defineOptions({ name: 'RoleMgt' })
+defineOptions({ name: 'RoleManagement' })
 
 const usePermission = usePermissionStore()
 

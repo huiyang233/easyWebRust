@@ -5,7 +5,7 @@ use salvo::{Depot, Request};
 
 use crate::auth::auth_check::AuthCheck;
 use crate::middleware::blacklist::BlackListMid;
-use crate::model::black_list::{BlackList, BlackListAddDto, BlackListEditDto, BlackListPageReq, BlackListVo};
+use crate::model::black_list::{BlackList, BlackListAddDto, BlackListConfig, BlackListConfigEditDto, BlackListConfigVo, BlackListEditDto, BlackListPageReq, BlackListVo};
 use crate::model::result::{Http, HttpPage, PageDto, ResultError, WebResult};
 use crate::RB;
 
@@ -70,6 +70,8 @@ impl BlackListService{
         }
     }
 
+
+
     pub async fn edit_black_list_by_id(req: &mut Request,depot: &mut Depot)->Http<String> {
         let id = req.param::<u64>("id");
         let id =match id {
@@ -89,4 +91,25 @@ impl BlackListService{
         let i = BlackListMid::add_black_list_date_time(dto.ip, dto.ban_time,dto.reason).await;
         Ok(WebResult::success(i.to_string()))
     }
+
+    pub async fn edit_black_config(req: &mut Request,depot: &mut Depot)->Http<String> {
+        let dto = req.parse_json::<BlackListConfigEditDto>().await?;
+        BlackListConfig::update_by_id(RB.deref(), &dto.ban_time, &dto.interval, &dto.visit_count,&1).await?;
+        BlackListMid::update_black_config(dto.ban_time,dto.interval,dto.visit_count).await;
+        Ok(WebResult::success_none())
+    }
+
+    pub async fn get_black_config()->Http<BlackListConfigVo> {
+        let option = BlackListConfig::select_by_id(RB.deref(), &1).await?;
+        match option {
+            None => {
+                Err(ResultError::resource_not_found("black_list_config".to_string()))
+            }
+            Some(user) => {
+                Ok(WebResult::success(BlackListConfigVo::from(user)))
+            }
+        }
+    }
 }
+
+

@@ -38,7 +38,7 @@ export const permissionRoutes = [
           title: '用户管理',
           icon: 'i-fe:user',
           show: true,
-          keepAlive: null,
+          keepAlive: true,
         },
       },
       {
@@ -50,11 +50,7 @@ export const permissionRoutes = [
           title: '角色管理',
           icon: 'i-fe:users',
           show: true,
-          keepAlive: null,
-          btns: [{
-            code: 'AddRole',
-            name: '新建角色'
-          }]
+          keepAlive: true,
         }
 
       },
@@ -67,7 +63,7 @@ export const permissionRoutes = [
           title: '权限管理',
           icon: 'i-fe:key',
           show: true,
-          keepAlive: null,
+          keepAlive: true,
         }
 
       },
@@ -80,7 +76,7 @@ export const permissionRoutes = [
           title: '日志管理',
           icon: 'i-fe:edit',
           show: true,
-          keepAlive: null,
+          keepAlive: true,
         }
       },
       {
@@ -92,7 +88,7 @@ export const permissionRoutes = [
           title: '黑名单管理',
           icon: 'i-fe:book',
           show: true,
-          keepAlive: null,
+          keepAlive: true,
         }
 
       }

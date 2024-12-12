@@ -65,7 +65,7 @@
   import {XNDataTable, XNDataTableColumn} from '@skit/x.naive-ui'
   import {AppCard, CommonPage, MeQueryItem} from '@/components/index.js'
 
-  defineOptions({ name: 'SysLog' })
+  defineOptions({ name: 'LogManagement' })
 
   const selectOptions = [
         {
@@ -90,16 +90,6 @@
   const loading = ref(false)
   const pagination = reactive({ page: 1, pageSize: 10 })
   const queryItems = ref({})
-  const modalFormRef= ref(null)
-  const modal = ref({
-    show:false,
-    form:{},
-    title:"",
-    //type 1添加 2编辑
-    type:2,
-    loading:false
-  })
-  
   
   function handleSearch() {
     pagination.page = 1

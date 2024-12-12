@@ -210,6 +210,12 @@ impl BlackListMid {
 
     }
 
+    pub async fn update_black_config(ban_time:u64,interval: u64,visit_count: u64){
+        let mut config_lock = BLACK_LIST_CONFGI.write().await;
+        config_lock.visit_count = visit_count;
+        config_lock.ban_time = ban_time;
+        config_lock.interval = interval;
+    }
 
     pub async fn del_black_list(ip:String){
         BLACK_LIST.remove(ip.as_str()).await;
@@ -230,7 +236,6 @@ impl Handler for BlackListMid {
             return;
         }
         let config = BLACK_LIST_CONFGI.read().await;
-        info!("config:{:?}",config);
         let x = self.cache.get(ip.as_str()).await;
         match x {
             None => {

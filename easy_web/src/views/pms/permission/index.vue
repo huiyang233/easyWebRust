@@ -36,7 +36,7 @@
   import {XNDataTable, XNDataTableColumn} from '@skit/x.naive-ui'
   import {AppCard, CommonPage, MeQueryItem} from '@/components/index.js'
 
-  defineOptions({ name: 'SysPermission' })
+  defineOptions({ name: 'PermissionManagement' })
   
   const tableData = ref([])
   const loading = ref(false)

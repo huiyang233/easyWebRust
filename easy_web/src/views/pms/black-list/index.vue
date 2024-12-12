@@ -7,7 +7,7 @@
           创建
         </n-button>
 
-        <n-button  v-permission="['black_list:add']"  type="primary" @click="handleAdd()">
+        <n-button  v-permission="['black_list:add']"  type="primary" @click="handleConfig()">
           <i class="i-material-symbols:edit-outline mr-4 text-18" />
           配置黑名单参数
         </n-button>
@@ -35,14 +35,14 @@
     </AppCard>
     <x-n-data-table :remote="true" :loading="loading" :pagination="pagination" :data="tableData" :scroll-x="800"  @update:page="onPageChange">
 
-      <x-n-data-table-column width="150" fixed="left"  key="ip" title="IP" >
+      <x-n-data-table-column width="150"  key="ip" title="IP" >
       </x-n-data-table-column>
-      <x-n-data-table-column width="150" fixed="left"  key="createTime" title="封禁日期" >
+      <x-n-data-table-column width="150"  key="createTime" title="封禁日期" >
       </x-n-data-table-column>
 
-      <x-n-data-table-column width="150" fixed="left"  key="reason" title="原因" >
+      <x-n-data-table-column width="150" key="reason" title="原因" >
       </x-n-data-table-column>
-      <x-n-data-table-column width="150" fixed="left"  key="banTime" title="封禁时间" >
+      <x-n-data-table-column width="150"  key="banTime" title="封禁时间" >
         <template #render-cell="{ column, rowData, rowIndex }">
           <n-tag v-if="rowData.banTime===null" class="mr-4" :bordered="false"  type="error">永久</n-tag>
           <span>{{ rowData.banTime }}</span>
@@ -112,6 +112,66 @@
         </template>
       </n-card>
     </n-modal>
+
+    <n-modal
+        v-model:show="configModal.show"
+        title="确认"
+        style="width: 720px"
+        :bordered="false"
+        size="huge"
+        :preset="'card'"
+        class="modal-box"
+        width="520px"
+
+    >
+
+<!--        <n-card :closable="true" @close="configModal.show = false">-->
+          <template #header>
+            <header class="modal-header">{{ configModal.title }}</header>
+
+
+          </template>
+
+
+      <n-spin :show="configModal.loading">
+            <n-form  ref="configModalFormRef" label-placement="left" label-align="left" :label-width="100" :model="configModal.form">
+              <n-form-item  label="间隔时间" path="banTime">
+                <n-input-number v-model:value="configModal.form.interval">
+                  <template #suffix>
+                    秒
+                  </template>
+                </n-input-number>
+              </n-form-item>
+              <n-form-item  label="间隔时间阈值" path="banTime">
+                <n-input-number v-model:value="configModal.form.visitCount">
+                  <template #suffix>
+                    个
+                  </template>
+                </n-input-number>
+              </n-form-item>
+              <n-form-item label="禁封时间" path="banTime">
+                <n-input-number v-model:value="configModal.form.banTime">
+                  <template #suffix>
+                    秒
+                  </template>
+                </n-input-number>
+               </n-form-item>
+            </n-form>
+      </n-spin>
+
+            <template #footer>
+              <footer class="flex justify-end">
+                <n-button :disabled="configModal.loading" @click="configModal.show=false">
+                  取消
+                </n-button>
+                <n-button  :disabled="configModal.loading" :loading="configModal.buttonLoading" @click="handleConfigSubmit()" type="primary" class="ml-20">
+                  保存
+                </n-button>
+              </footer>
+            </template>
+<!--      </n-card>-->
+
+    </n-modal>
   </CommonPage>
 </template>
 
@@ -121,7 +181,7 @@ import api from './api'
 import {XNDataTable, XNDataTableColumn} from '@skit/x.naive-ui'
 import {AppCard, CommonPage, MeQueryItem} from '@/components/index.js'
 
-defineOptions({ name: 'BlackList' })
+defineOptions({ name: 'BlackListManagement' })
 
 const tableData = ref([])
 const loading = ref(false)
@@ -137,10 +197,12 @@ const modal = ref({
   loading:false
 })
 
+const configModalFormRef= ref(null)
 const configModal = ref({
   show:false,
   form:{},
   title:"",
+  buttonLoading:false,
   loading:false
 })
 
@@ -158,6 +220,25 @@ function handleEdit(row){
   modal.value.title="编辑"
 }
 
+async function handleConfig(){
+  configModal.value.show = true
+  configModal.value.form = { }
+  configModal.loading = true
+  configModal.value.title="配置黑名单参数"
+  try {
+    const { data } = await api.getBlackListConfig()
+    configModal.loading = false
+    configModal.value.form = data;
+
+
+  }catch (error){
+    $message.error('黑名单获取失败')
+    configModal.loading = false
+    configModal.value.show = false
+  }
+
+
+}
 function handleAdd(){
   modal.value.type=1
   modal.value.form = { }
@@ -165,6 +246,21 @@ function handleAdd(){
   modal.value.title="添加"
 }
 
+
+async function handleConfigSubmit(){
+  await configModalFormRef.value?.validate()
+  configModal.value.loading = true
+
+  try{
+    await api.setBlackListConfig(configModal.value.form)
+    configModal.value.show = false
+    $message.success('保存成功')
+    configModal.value.loading = false
+  }catch(error){
+    $message.error('保存失败')
+    configModal.value.loading = false
+  }
+}
 
 async function handleSubmit(){
   await modalFormRef.value?.validate()

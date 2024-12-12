@@ -56,7 +56,7 @@ async fn main() {
         .allow_methods(Any)
         .allow_headers(Any)
         .into_handler();
-    let black = BlackListMid::new(10);
+    let black = BlackListMid::new(60*60);
 
     // 初始化服务
     let service = Service::new(router).hoop(log).hoop(black).hoop(cors_handler);
