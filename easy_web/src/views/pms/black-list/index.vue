@@ -7,7 +7,7 @@
           创建
         </n-button>
 
-        <n-button  v-permission="['black_list:add']"  type="primary" @click="handleConfig()">
+        <n-button v-permission="['black_list:add']"  type="primary" @click="handleConfig()">
           <i class="i-material-symbols:edit-outline mr-4 text-18" />
           配置黑名单参数
         </n-button>
@@ -116,7 +116,7 @@
     <n-modal
         v-model:show="configModal.show"
         title="确认"
-        style="width: 720px"
+        style="width: 520px"
         :bordered="false"
         size="huge"
         :preset="'card'"
@@ -136,21 +136,27 @@
       <n-spin :show="configModal.loading">
             <n-form  ref="configModalFormRef" label-placement="left" label-align="left" :label-width="100" :model="configModal.form">
               <n-form-item  label="间隔时间" path="banTime">
-                <n-input-number v-model:value="configModal.form.interval">
+                <n-input-number class="w-100%" :show-button="false" v-model:value="configModal.form.interval">
                   <template #suffix>
                     秒
                   </template>
                 </n-input-number>
               </n-form-item>
               <n-form-item  label="间隔时间阈值" path="banTime">
-                <n-input-number v-model:value="configModal.form.visitCount">
+                <n-input-number class="w-100%" :show-button="false" v-model:value="configModal.form.visitCount">
                   <template #suffix>
                     个
                   </template>
                 </n-input-number>
               </n-form-item>
+
+              <n-alert  class="mb-20" type="warning" closable>
+                禁封时间设置0为永久禁封
+              </n-alert>
+
               <n-form-item label="禁封时间" path="banTime">
-                <n-input-number v-model:value="configModal.form.banTime">
+
+                <n-input-number class="w-100%" :show-button="false" v-model:value="configModal.form.banTime">
                   <template #suffix>
                     秒
                   </template>

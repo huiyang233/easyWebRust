@@ -62,6 +62,36 @@ pub async fn auth_check(req: &mut Request, depot: &mut Depot, _res: &mut Respons
     }
 }
 
+pub async fn get_user(token:Option<String>)->Option<SysUser>{
+    let token = match token {
+        None => {
+          return None
+        }
+        Some(token) => {token}
+    };
+    // 判断token格式
+    let token = if token.starts_with("Bearer ") {
+        token.replace("Bearer ", "")
+    } else {
+       return None
+    };
+    let user_id = USER_LOGIN_CACHI.get(token.as_str()).await;
+
+
+    let user_id = match user_id {
+        None => {
+            return None
+        }
+        Some(data) => {
+            data
+        }
+    };
+    // 查数据库
+    let user_info = UserService::get_user_by_id(user_id).await;
+    user_info
+
+}
+
 pub trait AuthCheck {
     fn get_user(&self)->Result<&SysUser,ResultError>;
     async fn get_permission(&self) ->Result<Vec<SysPermission>,ResultError>;

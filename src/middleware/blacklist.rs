@@ -1,3 +1,4 @@
+use crate::auth::auth_check::get_user;
 use crate::model::black_list::{BlackList, BlackListConfig};
 use crate::model::result::{ResultError, WebResult};
 use crate::task::black_list_task::BlackListInsertTask;
@@ -247,8 +248,24 @@ impl Handler for BlackListMid {
                 self.cache.set(ip.as_str(), number).await;
                 if number >= config.visit_count {
                     // 黑名单拦截
+                    let mut add_black = true;
+                    let token = req.header::<String>("Authorization");
+                    // 判断有没有token
+                    let user_op = get_user(token).await;
+                    match user_op {
+                        Some(user) => {
+                            // 超级管理员不要封号
+                            if user.is_super_admin {
+                                add_black = false;
+                            }
+                        }
+                        _ => {}
+                    }
                     self.cache.remove(ip.as_str()).await;
-                    BlackListMid::add_black_list(ip,config.ban_time,"自动".to_string()).await;
+                    if add_black {
+                        BlackListMid::add_black_list(ip,config.ban_time,"自动".to_string()).await;
+                    }
+
                 }
             }
         }
