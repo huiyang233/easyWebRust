@@ -1,0 +1,28 @@
+server:
+  port: 5800
+db_config:
+  db_url: postgres://user:pwd@ip:port/postgres
+redis_url: redis://[user:]pwd@ip/
+# 文件保存位置
+file:
+  file_path: ./file/
+  url: http://localhost:5800/
+# 阿里短信
+sms_config:
+  app_key: app_key
+  app_secret: app_secret
+  sign_name: sign_name
+  region_id: region_id
+# 小程序
+wx_config:
+  app_id: app_id
+  secret: secret
+# 微信支付
+pay:
+  wechat:
+    app_id: 123
+    private_key: 123
+    mch_id: 123
+    serial_no: 123
+    v3_key: 123
+    notify_url: 123
