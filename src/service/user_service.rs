@@ -2,7 +2,7 @@ use crate::auth::auth_check::AuthCheck;
 use crate::model::result::{Http, HttpPage, PageDto, ResultError, WebResult, WebResultPage};
 use crate::model::role::SysRoleVo;
 use crate::model::user::{ChangePasswordDto, ChangeUserInfoDto, SysUser, SysUserPageReq, SysUserRole, SysUserVo, UserAddDto, UserEditDto};
-use crate::service::role_service::SysRoleService;
+use crate::service::role_service::{SysRoleService, USER_SYS_ROLE_CACHI};
 use crate::utils::db::Redis;
 use crate::utils::vec::FromVo;
 use crate::{get_sqlx_db, ID_WORKER};
@@ -73,7 +73,7 @@ impl UserService{
         let page_dto = req.parse_queries::<PageDto>().unwrap_or_else(|_| PageDto{ page: 1, page_size: 10});
         let item = req.parse_queries::<SysUserPageReq>()?;
         item.validate()?;
-        let user_page = SysUser::select_page(item,page_dto).await?;
+        let user_page = SysUser::select_page(page_dto,&item).await?;
         let mut page_vo = WebResultPage::<SysUserVo>::from(user_page);
         for  x in &mut page_vo.page_data {
             let option = SysRoleService::select_by_user_id(x.id).await;
@@ -170,6 +170,7 @@ impl UserService{
         }
         database_user.update(&mut *transaction).await?;
         transaction.commit().await?;
+        USER_SYS_ROLE_CACHI.set_minute(database_user.id.to_string().as_str(), &role_vec,10).await.ok();
 
         SYS_USER_CACHI.set_minute(database_user.id.to_string().as_str(), &database_user,10).await.ok();
 

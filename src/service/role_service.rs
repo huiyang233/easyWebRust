@@ -42,9 +42,14 @@ impl SysRoleService{
     }
 
     pub async fn select_by_user_id(user_id: i64) -> Option<Vec<SysRole>> {
+        if let Some(vec) = USER_SYS_ROLE_CACHI.get(user_id.to_string().as_str()).await{
+            return Some(vec)
+        }
+
         let sys_role = SysRole::select_by_user_id(&user_id).await;
         match sys_role {
             Ok(sys_role) => {
+                USER_SYS_ROLE_CACHI.set_minute(user_id.to_string().as_str(), &sys_role, 10).await.ok();
                 Some(sys_role)
             }
             Err(_) => { None }

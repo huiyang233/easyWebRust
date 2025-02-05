@@ -457,6 +457,10 @@ macro_rules! impl_page {
 
                 builder.push_sql(" where 1=1 ");
 
+                if let Some(logic_del_field) = <$table>::get_logic_del_field(){
+                    builder.push_sql(&format!(" and {} = false ",logic_del_field));
+                }
+
                 $where_sql(&mut builder);
 
                 builder.build_page().await

@@ -1,4 +1,4 @@
-use crate::model::result::{PageDto, WebResultPage};
+use crate::impl_page;
 use crate::model::role::SysRoleVo;
 use crate::utils::db::{Executor, PageBuilder, QueryBuilder};
 use crate::utils::serialize::deserialize_id;
@@ -138,7 +138,7 @@ pub struct SysUserVo {
 #[derive(Deserialize, Serialize, Debug, Clone,Validate)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct SysUserPageReq {
-    pub name: Option<String>,
+    pub user_name: Option<String>,
     pub phone_number: Option<String>,
 
 }
@@ -195,19 +195,31 @@ impl SysUser {
             .scalar_fetch_one().await
     }
 
-    pub async fn select_page(item:SysUserPageReq,page_dto: PageDto)->Result<WebResultPage<SysUser>,Error>{
-        let mut builder = PageBuilder::<SysUser>::
-        new_sql(page_dto,"select * from sys_user where is_del=false ");
-        if let Some(name) = item.name {
-            builder.push_sql(" and name like CONCAT('%', ?, '%') ");
-            builder.bind(name);
-        }
-
-        if let Some(phone_number) = item.phone_number {
-            builder.push_sql(" and phone_number like CONCAT('%', ?, '%') ");
-            builder.bind(phone_number);
-        }
-        builder.push_sql(" order by create_time desc ");
-        builder.build_page().await
-    }
+    // pub async fn select_page(item:SysUserPageReq,page_dto: PageDto)->Result<WebResultPage<SysUser>,Error>{
+    //     let mut builder = PageBuilder::<SysUser>::
+    //     new_sql(page_dto,"select * from sys_user where is_del=false ");
+    //     if let Some(name) = item.name {
+    //         builder.push_sql(" and name like CONCAT('%', ?, '%') ");
+    //         builder.bind(name);
+    //     }
+    //
+    //     if let Some(phone_number) = item.phone_number {
+    //         builder.push_sql(" and phone_number like CONCAT('%', ?, '%') ");
+    //         builder.bind(phone_number);
+    //     }
+    //     builder.push_sql(" order by create_time desc ");
+    //     builder.build_page().await
+    // }
 }
+
+impl_page!(SysUser{select_page(req:&SysUserPageReq)=>|builder:&mut PageBuilder<SysUser>|{
+
+     if let Some(user_name) = &req.user_name {
+        builder.and_like("user_name",user_name);
+    }
+
+    if let Some(phone_number) = &req.phone_number {
+        builder.and_like("phone_number",phone_number)
+    }
+    builder.push_sql(" order by create_time asc");
+}});

@@ -242,7 +242,10 @@ impl Handler for BlackListMid {
             }
             Some(mut number) => {
                 number = number + 1;
-                info!("ip:{},number:{}", ip, number);
+                if number % 50==0 {
+                    info!("ip:{},count:{}", ip, number);
+                }
+
                 self.cache.set(ip.as_str(), number).await;
                 if number >= config.visit_count {
                     // 黑名单拦截

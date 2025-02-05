@@ -63,7 +63,6 @@ pub fn get_sqlx_db() -> sqlx::Pool<Postgres> {
 
 #[tokio::main]
 async fn main() {
-
     // _guard必须贯穿整个主流程
     let _guard = utils::log::init_log();
     // 定时任务初始化
@@ -82,7 +81,10 @@ async fn main() {
     let black = BlackListMid::new(60*60);
 
     // 初始化服务
-    let service = Service::new(router).hoop(log).hoop(black).hoop(cors_handler);
+    let service = Service::new(router)
+        .hoop(log)
+        .hoop(black)
+        .hoop(cors_handler);
 
     //// 证书
     // let cert = include_bytes!("../certs/cert.pem").to_vec();

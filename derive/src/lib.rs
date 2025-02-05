@@ -69,6 +69,23 @@ fn get_all_fields(fields: &syn::punctuated::Punctuated<Field, syn::token::Comma>
 
 
 
+fn generate_get_logic_del_field_method(logic_del_field: &Option<syn::Ident>) -> TokenStream2 {
+    let sql = if let Some(logic_del_field) = logic_del_field {
+        let string = format!("{}",logic_del_field);
+        quote!(
+            Some(#string)
+        )
+    } else {
+        quote!{None}
+    };
+
+    quote! {
+        pub fn get_logic_del_field() -> Option<&'static str> {
+           return #sql;
+        }
+    }
+}
+
 fn generate_select_by_pk_method(table_name: &str, pk_field: &Option<(syn::Ident, Type)>, logic_del_field: &Option<syn::Ident>, ) -> TokenStream2 {
     if let Some((pk_ident, pk_type)) = pk_field {
         let method_name = format_ident!("select_by_{}", pk_ident);
@@ -457,6 +474,8 @@ pub fn derive_curd(input: TokenStream) -> TokenStream {
     let update_col_method = generate_update_col_method(name.to_string(),&table_name, fields, &pk_field, &logic_del_field);
     let get_table_name_method = generate_get_table_name_method(&table_name);
 
+    let get_logic_del_field_method = generate_get_logic_del_field_method(&logic_del_field);
+
     // 生成字段枚举
     let field_enum = generate_field_enum(name.to_string(),fields);
 
@@ -470,6 +489,7 @@ pub fn derive_curd(input: TokenStream) -> TokenStream {
             #delete_method
             #delete_by_id_method
             #get_table_name_method
+            #get_logic_del_field_method
         }
 
         #field_enum
