@@ -48,7 +48,7 @@ pub struct BlackListMid{
 impl BlackListMid {
     pub fn new(sync_interval:i32) -> Self {
         let list = Self {
-            cache: MiniRedis::new("cache"),
+            cache: MiniRedis::new("request_count_cache"),
             sync_interval,
         };
         BlackListMid::sync_black_list(list.sync_interval);

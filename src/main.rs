@@ -13,6 +13,7 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::Postgres;
 use std::sync::LazyLock;
 use tokio::sync::OnceCell;
+use tracing::info;
 // use wechat_pay_rust_sdk::pay::WechatPay;
 
 mod model;
@@ -78,13 +79,38 @@ async fn main() {
         .allow_methods(Any)
         .allow_headers(Any)
         .into_handler();
-    let black = BlackListMid::new(60*60);
 
-    // 初始化服务
-    let service = Service::new(router)
-        .hoop(log)
-        .hoop(black)
-        .hoop(cors_handler);
+    let mut service = Service::new(router);
+    service = service.hoop(cors_handler);
+    // 默认开启黑名单服务 配置文件中添加black_switch: false可关闭
+    match SERVER_CONFIG.black_switch {
+        None => {
+            let black = BlackListMid::new(60*60);
+            service = service.hoop(black);
+            info!("黑名单[已启动]")
+        }
+        Some(black_switch) => {
+            if let true = black_switch {
+                let black = BlackListMid::new(60*60);
+                service = service.hoop(black);
+                info!("黑名单[已启动]")
+            }
+        }
+    }
+    // 默认开启记录请求 配置文件中添加log_switch: false可关闭
+    match SERVER_CONFIG.log_switch {
+        None => {
+            service = service.hoop(log);
+            info!("请求记录[已启动]")
+        }
+        Some(log_switch) => {
+            if let true = log_switch {
+                service = service.hoop(log);
+                info!("请求记录[已启动]")
+            }
+        }
+    }
+
 
     //// 证书
     // let cert = include_bytes!("../certs/cert.pem").to_vec();

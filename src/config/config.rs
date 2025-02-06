@@ -14,7 +14,9 @@ pub struct Config {
     pub sms_config: SmsConfig,
     pub pay:PayConfig,
     pub wx_config:MpWxConfig,
-    pub file:FileConfig
+    pub file:FileConfig,
+    pub black_switch:Option<bool>,
+    pub log_switch:Option<bool>
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone,Default)]
