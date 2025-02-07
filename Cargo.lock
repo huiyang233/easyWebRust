@@ -718,6 +718,7 @@ dependencies = [
  "proc-macro-error2",
  "proc-macro2",
  "quote",
+ "regex",
  "syn",
 ]
 

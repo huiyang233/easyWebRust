@@ -275,6 +275,50 @@ impl<E> QueryBuilder<E> {
         Ok(vec)
     }
 
+    pub async fn fetch_all_no_marks(self) -> Result<Vec<E>, Error>
+    where
+        E: for<'r> FromRow<'r, PgRow> + Send + Sync + Unpin,
+    {
+
+        info!("select Sql:{}", self.sql);
+        let query_builder = sqlx::query_as_with::<_, E, _>(&self.sql, self.value);
+        let vec = query_builder.fetch_all(&get_sqlx_db()).await?;
+        Ok(vec)
+    }
+
+    pub async fn scalar_fetch_no_marks(self) -> Result<E, Error>
+    where
+        (E,): for<'r> FromRow<'r, PgRow>,
+        E: Send + Unpin,
+    {
+
+        info!("select Sql:{}", self.sql);
+        let query_builder = sqlx::query_scalar_with::<_, E, _>(&self.sql, self.value);
+        let e = query_builder.fetch_one(&get_sqlx_db()).await?;
+        Ok(e)
+    }
+
+    pub async fn fetch_optional_no_marks(self) -> Result<Option<E>, Error>
+    where
+        E: for<'r> FromRow<'r, PgRow> + Send + Sync + Unpin,
+    {
+
+        info!("select Sql:{}", self.sql);
+        let query_builder = sqlx::query_as_with::<_, E, _>(&self.sql, self.value);
+        let e = query_builder.fetch_optional(&get_sqlx_db()).await?;
+        Ok(e)
+    }
+    pub async fn fetch_one_no_marks(self) -> Result<E, Error>
+    where
+        E: for<'r> FromRow<'r, PgRow> + Send + Sync + Unpin,
+    {
+
+        info!("select Sql:{}", self.sql);
+        let query_builder = sqlx::query_as_with::<_, E, _>(&self.sql, self.value);
+        let e = query_builder.fetch_one(&get_sqlx_db()).await?;
+        Ok(e)
+    }
+
     pub async fn scalar_fetch_one(self) -> Result<E, Error>
     where
         (E,): for<'r> FromRow<'r, PgRow>,
@@ -325,7 +369,6 @@ impl DB {
                 result.push(c);
             }
         }
-
         result
     }
 }

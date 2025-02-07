@@ -1,10 +1,13 @@
-use darling::FromDeriveInput;
+use darling::{Error, FromDeriveInput, FromMeta};
 use darling::FromField;
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
+use darling::ast::NestedMeta;
+use darling::usage::UsesTypeParams;
+use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
 use quote::{format_ident, quote, ToTokens};
+use regex::Regex;
 use syn::punctuated::Punctuated;
-use syn::{parse::Parse, parse::ParseStream, parse_macro_input, Data, DeriveInput, Field, Fields, ItemFn, Token, Type};
+use syn::{parse::Parse, parse::ParseStream, parse_macro_input, Data, DeriveInput, Field, Fields, FnArg, GenericArgument, ItemFn, Pat, PathArguments, ReturnType, Token, Type};
 
 #[derive(FromDeriveInput, Default)]
 #[darling(default, attributes(curd))]
@@ -17,6 +20,25 @@ struct CURDOpts {
 struct FieldOpts {
     pk: bool,
     logic_del: bool,
+}
+
+#[derive(Debug, FromMeta)]
+struct MethodOpts {
+    sql: String,
+}
+
+
+
+
+
+fn generate_custom_query_method(method_name: &syn::Ident, sql: &str) -> TokenStream2 {
+    quote! {
+        pub async fn #method_name(db: impl sqlx::Executor<'_, Database=sqlx::Postgres>) -> Result<Vec<Self>, sqlx::Error> {
+            crate::utils::db::QueryBuilder::<Self>::new_sql(#sql)
+                .fetch_all()
+                .await
+        }
+    }
 }
 
 fn convert_type_to_ref(ty: &Type) -> TokenStream2 {
@@ -65,7 +87,6 @@ fn get_all_fields(fields: &syn::punctuated::Punctuated<Field, syn::token::Comma>
         })
         .collect()
 }
-
 
 
 
@@ -420,22 +441,151 @@ fn to_snake_name(name: &str) -> String {
     }
     return new_name;
 }
+
+fn get_return_type(return_type: ReturnType)->Option<Vec<Ident>>{
+    let ty = if let ReturnType::Type(_, ref ty) = return_type {
+        ty
+    }else {
+        return None;
+    };
+    let type_path = if let Type::Path(type_path) = ty.as_ref() {
+        type_path
+    }else {
+        return None;
+    };
+    let mut return_type = vec![];
+    type_path.path.segments.iter().for_each(|x|{
+        println!("ident:{:?}", x.ident.to_string());
+        return_type.push(x.ident.clone());
+            if let PathArguments::AngleBracketed(v) = x.arguments.clone() {
+                // 最外层的Result
+                if let Some(GenericArgument::Type(Type::Path(inner_type_path))) = v.args.first() {
+                    inner_type_path.path.segments.iter().for_each(|option| {
+                        // 第二层的Option
+                        return_type.push(option.ident.clone());
+                        if let PathArguments::AngleBracketed(v) = option.arguments.clone() {
+                            if let Some(GenericArgument::Type(Type::Path(inner_type_path))) = v.args.first() {
+                                inner_type_path.path.segments.iter().for_each(|option| {
+                                    return_type.push(option.ident.clone());
+                                    if let PathArguments::AngleBracketed(v) = option.arguments.clone() {
+                                        if let Some(GenericArgument::Type(Type::Path(inner_type_path))) = v.args.first() {
+                                            inner_type_path.path.segments.iter().for_each(|option| {
+                                                return_type.push(option.ident.clone());
+                                            })
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                    });
+                }
+            }
+    });
+    Some(return_type)
+}
+
+fn extract_placeholders(input: &str) -> Vec<String> {
+    let re = Regex::new(r"\#\{([^}]+)\}").unwrap();
+    re.captures_iter(input)
+        .filter_map(|caps| caps.get(1).map(|m| m.as_str().to_string()))
+        .collect()
+}
+
 #[proc_macro_attribute]
-pub fn snake_name(args: TokenStream, func: TokenStream) -> TokenStream {
-    let args = parse_macro_input!(args as ParseArgs);
-    let mut struct_name = "".to_string();
-    for x in args.sqls {
-        struct_name += x.to_string().as_str();
+pub fn select(args: TokenStream, input: TokenStream) -> TokenStream {
+    let attr_args = match NestedMeta::parse_meta_list(args.into()) {
+        Ok(v) => v,
+        Err(e) => { return TokenStream::from(Error::from(e).write_errors()); }
+    };
+
+    let input = syn::parse_macro_input!(input as ItemFn);
+    let args = match MethodOpts::from_list(&attr_args) {
+        Ok(v) => v,
+        Err(e) => { return TokenStream::from(e.write_errors()); }
+    };
+
+    let visibility = input.vis;
+    let signature = input.sig;
+    let asyncness = signature.asyncness;
+    let ident = signature.ident;
+    let inputs = signature.inputs;
+    let output = signature.output;
+
+    let mut is_option = false;
+    let mut is_vec = false;
+    let return_type_vec = get_return_type(output.clone());
+    let return_type_vec =  match return_type_vec {
+        None => { panic!("Not Return Type") }
+        Some(return_type_vec) => {return_type_vec}
+    };
+
+    if return_type_vec.contains(&Ident::new("Vec", Span::call_site())) {
+        is_vec = true;
     }
-    struct_name = to_snake_name(&struct_name);
-    let target_fn: ItemFn = syn::parse(func).unwrap();
-    let func_name_ident = target_fn.sig.ident.to_token_stream();
-    let stream = quote!(
-        pub fn #func_name_ident() -> String {
-             #struct_name.to_string()
+
+
+
+    if return_type_vec.contains(&Ident::new("Option", Span::call_site())) {
+        is_option = true;
+    }
+    let fetch_type = if is_option {
+        quote! {
+            .fetch_optional_no_marks().await
         }
-    );
-    stream.into()
+    }else if is_vec{
+        quote! {
+            .fetch_all_no_marks().await
+        }
+    }else{
+        quote! {
+            .fetch_one_no_marks().await
+        }
+    };
+    let return_type = return_type_vec.get(return_type_vec.len() - 1);
+    let return_type =  match return_type {
+        None => { panic!("Not Return Type") }
+        Some(return_type) => {return_type}
+    };
+    let sql = args.sql;
+    let placeholders = extract_placeholders(&sql);
+    let mut args_vec = vec![];
+    for fn_arg in inputs.clone() {
+        if let FnArg::Typed(typed)=fn_arg{
+            if let Pat::Ident(x)=typed.pat.as_ref() {
+                args_vec.push(x.ident.clone())
+            }
+        }
+    }
+    let bind_field:Vec<_> = placeholders.iter().map(|x|{
+        let split = x.split('.');
+        let mut field = vec![];
+        for x in split {
+            field.push(Ident::new(x, Span::call_site()))
+        }
+        quote! { #(#field).* }
+    }).collect();
+
+    // 替换占位符为 ?
+    let sql_with_placeholders = placeholders.iter()
+        .enumerate()
+        .fold(sql.to_string(), |acc, (index, placeholder)| {
+            acc.replace(&format!("#{{{}}}", placeholder), &format!("${}", index + 1))
+        });
+
+
+    let expanded = quote! {
+        #visibility #asyncness fn #ident(#inputs) #output{
+            crate::utils::db::QueryBuilder::<#return_type>::new_sql(#sql_with_placeholders)
+            #(.bind(#bind_field))*
+            #fetch_type
+        }
+    };
+
+
+    let stream = TokenStream::from(expanded);
+    println!("stream:::{:#?}", stream.to_string());
+    stream
+
 }
 
 #[proc_macro_derive(CURD, attributes(curd))]
@@ -461,6 +611,7 @@ pub fn derive_curd(input: TokenStream) -> TokenStream {
         },
         _ => panic!("CRUD derive only supports structs"),
     };
+
 
     let pk_field = find_pk_field(fields);
     let logic_del_field = find_logic_del_field(fields);
@@ -497,6 +648,7 @@ pub fn derive_curd(input: TokenStream) -> TokenStream {
 
     TokenStream::from(expanded)
 }
+
 
 fn to_pascal_case(input: &str) -> String {
     let mut result = String::new();

@@ -90,33 +90,47 @@ impl_page!(SysUser{select_page(req:&SysUserPageReq)=>|builder:&mut PageBuilder<S
 ```
 #### 自定义SQL
 ```rust
-// 可以使用封装的QueryBuilder，也可以使用原生的SQLx
-pub async fn get_count() -> Result<i64,Error> {
-    QueryBuilder::<i64>::new_sql("select count(*) from sys_user where is_del = false ")
-        .scalar_fetch_one().await
-}
+impl SysUser {
+    // 支持宏，目前只支持添加了FromRow的结构体使用支持Option和Vec
+    #[select(sql="select * from sys_user where is_del=false and id = #{user_id}")]
+    pub async fn select_by_user(user_id: &i64) -> Result<Option<SysUser>, Error> {
 
-pub async fn select_by_user_name(user_name: &str) -> Result<Option<SysUser>,Error> {
-    QueryBuilder::<SysUser>::new_sql("select * from sys_user where is_del=false and user_name = ? limit 1")
-        .bind(user_name)
-        .fetch_optional().await
-}
-
-pub async fn select_page(page_dto: PageDto,item:SysUserPageReq)->Result<WebResultPage<SysUser>,Error>{
-    let mut builder = PageBuilder::<SysUser>::
-    new_sql(page_dto,"select * from sys_user where is_del=false ");
-    if let Some(name) = item.name {
-        builder.push_sql(" and name like CONCAT('%', ?, '%') ");
-        builder.bind(name);
     }
 
-    if let Some(phone_number) = item.phone_number {
-        builder.push_sql(" and phone_number like CONCAT('%', ?, '%') ");
-        builder.bind(phone_number);
+    #[select(sql="select * from sys_user where is_del=false and user_name = #{user_name}")]
+    pub async fn select_by_user(user_name: &str) -> Result<Vec<SysUser>, Error> {
+
     }
-    builder.push_sql(" order by create_time desc ");
-    builder.build_page().await
+    
+    // 可以使用封装的QueryBuilder，也可以使用原生的SQLx
+    pub async fn get_count() -> Result<i64,Error> {
+        QueryBuilder::<i64>::new_sql("select count(*) from sys_user where is_del = false ")
+            .scalar_fetch_one().await
+    }
+
+    pub async fn select_by_user_name(user_name: &str) -> Result<Option<SysUser>,Error> {
+        QueryBuilder::<SysUser>::new_sql("select * from sys_user where is_del=false and user_name = ? limit 1")
+            .bind(user_name)
+            .fetch_optional().await
+    }
+
+    pub async fn select_page(page_dto: PageDto,item:SysUserPageReq)->Result<WebResultPage<SysUser>,Error>{
+        let mut builder = PageBuilder::<SysUser>::
+        new_sql(page_dto,"select * from sys_user where is_del=false ");
+        if let Some(name) = item.name {
+            builder.push_sql(" and name like CONCAT('%', ?, '%') ");
+            builder.bind(name);
+        }
+
+        if let Some(phone_number) = item.phone_number {
+            builder.push_sql(" and phone_number like CONCAT('%', ?, '%') ");
+            builder.bind(phone_number);
+        }
+        builder.push_sql(" order by create_time desc ");
+        builder.build_page().await
+    }
 }
+
 
 ```
 
